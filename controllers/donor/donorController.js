@@ -93,3 +93,11 @@ exports.getDonor = async (req, res, next) => {
   }
   res.render("donor/showIndividual", { donor });
 };
+exports.deleteDonor = async (req, res, next) => {
+  await sequelize.query("DELETE FROM donor WHERE id=?", {
+    type: QueryTypes.DELETE,
+    replacements: [req.params.id],
+  });
+  req.flash("success", "Deleted the donation portal sucessfully");
+  res.redirect("/");
+};

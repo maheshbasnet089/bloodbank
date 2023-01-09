@@ -10,6 +10,9 @@ const flash = require("connect-flash");
 const authRoute = require("./routes/authRoute");
 const eventRoute = require("./routes/eventRoute");
 const bloodBankRoute = require("./routes/bloodBankRoute");
+const donorRoute = require("./routes/donorRoute");
+const donorHistoryRoute = require("./routes/donorHistoryRoute");
+
 //ejs and json configuration
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
@@ -45,6 +48,8 @@ app.use((req, res, next) => {
 app.use("/", authRoute);
 app.use("/events", eventRoute);
 app.use("/bloodBank", bloodBankRoute);
+app.use("/donor", donorRoute);
+app.use("/donorHistory", donorHistoryRoute);
 
 //error beside routes route
 app.all("*", (req, res, next) => {
