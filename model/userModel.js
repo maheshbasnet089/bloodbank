@@ -55,6 +55,14 @@ module.exports = (sequelize, DataTypes, bcrypt, crypto) => {
       type: DataTypes.DATE,
       allowNull: false,
     },
+    donatedDate: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    availiabilityStatus: {
+      type: DataTypes.ENUM("yes", "no"),
+      defaultValues: "yes",
+    },
 
     passwordResetToken: DataTypes.STRING,
     passwordResetTokenExpiresIn: DataTypes.DATE,
