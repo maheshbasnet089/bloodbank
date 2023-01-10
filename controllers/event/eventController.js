@@ -2,6 +2,7 @@ const db = require("../../model/index");
 const sequelize = db.sequelize;
 const User = db.users;
 const AppError = require("../../utils/appError");
+const { cloudinary } = require("../../cloudinary");
 
 const { QueryTypes, DataTypes } = require("sequelize");
 exports.renderCreateEventPage = async (req, res, next) => {
@@ -22,6 +23,7 @@ exports.createEvent = async (req, res, next) => {
   } = req.body;
   const madeBy = "Admin";
   const address = province + "," + district + " ," + localLevel;
+
   if (
     !title ||
     !madeBy ||

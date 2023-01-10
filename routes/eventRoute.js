@@ -10,6 +10,9 @@ const {
 const router = express.Router();
 const catchAsync = require("../utils/catchAsync");
 const { restrictTo } = require("../utils/restrictTo");
+// const { storage } = require("../cloudinary");
+// const multer = require("multer");
+// const upload = multer({ dest: "uploads/" });
 
 router.route("/new").get(renderCreateEventPage);
 router.route("/update").get(renderUpdateEventForm);
