@@ -15,6 +15,7 @@ const donorHistoryRoute = require("./routes/donorHistoryRoute");
 const bloodRequestRoute = require("./routes/bloodRequestRoute");
 const bookAppointmentRoute = require("./routes/bookAppointmentRoute");
 const ambulanceRoute = require("./routes/ambulanceRoute");
+const contactRoute = require("./routes/contactRoute");
 
 //ejs and json configuration
 app.engine("ejs", ejsMate);
@@ -56,6 +57,7 @@ app.use("/donorHistory", donorHistoryRoute);
 app.use("/bookAppointment", bookAppointmentRoute);
 app.use("/bloodRequest", bloodRequestRoute);
 app.use("/ambulance", ambulanceRoute);
+app.use("/contact", contactRoute);
 
 //error beside routes route
 app.all("*", (req, res, next) => {

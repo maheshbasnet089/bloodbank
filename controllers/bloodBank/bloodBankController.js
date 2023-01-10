@@ -14,7 +14,7 @@ exports.createBloodBank = async (req, res, next) => {
     return next(new AppError("Please provide all fields", 400));
   try {
     await sequelize.query(
-      `CREATE TABLE bloodBank IF NOT EXISTS (id NOT NULL PRIMARY KEY AUTO_INCREMENT,name,address,phone)`,
+      `CREATE TABLE bloodBank IF NOT EXISTS (id NOT NULL PRIMARY KEY AUTO_INCREMENT,name,address,phone,createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)`,
       {
         type: QueryTypes.CREATE,
       }

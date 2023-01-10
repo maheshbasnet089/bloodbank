@@ -40,7 +40,7 @@ exports.createDonor = async (req, res, next) => {
   }
   try {
     await sequelize.query(
-      "CREATE TABLE IF NOT EXISTS donor (id NOT NULL PRIMARY KEY AUTO_INCREMENT,fullName VARCHAR(255),bloodGroup VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255),email VARCHAR(255),dob VARCHAR(255),phone VARCHAR(255),gender VARCHAR(255))",
+      "CREATE TABLE IF NOT EXISTS donor (id NOT NULL PRIMARY KEY AUTO_INCREMENT,fullName VARCHAR(255),bloodGroup VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255),email VARCHAR(255),dob VARCHAR(255),phone VARCHAR(255),gender VARCHAR(255),createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)",
       {
         type: QueryTypes.CREATE,
       }

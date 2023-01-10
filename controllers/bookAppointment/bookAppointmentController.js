@@ -20,7 +20,7 @@ exports.createBookAppointment = async (req, res, next) => {
     return res.redirect("/");
   }
   await sequelize.query(
-    "CREATE TABLE IF NOT EXISTS bookAppointment (id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,name VARCHAR(255),age VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),bloodGroup VARCHAR(255),donationDate VARCHAR(255))",
+    "CREATE TABLE IF NOT EXISTS bookAppointment (id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,name VARCHAR(255),age VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),bloodGroup VARCHAR(255),donationDate VARCHAR(255),createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)",
     { type: QueryTypes.CREATE }
   );
   await sequelize.query(

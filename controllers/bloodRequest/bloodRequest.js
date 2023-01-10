@@ -40,7 +40,7 @@ exports.createBloodRequest = async (req, res, next) => {
     req.flash("error", "Please fill all the fields");
     res.redirect(req.headers.referer || "/");
     await sequelize.query(
-      " CREATE TABLE bloodRequest IF NOT EXISTS(id NOT NULL INT PRIMARY KEY AUTO_INCREMENT,userId INT,patientName VARCHAR(255),contactPerson VARCHAR(255),bloodGroup VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255),hospital VARCHAR(255),requiredPint INT,phone INT,requiredDate DATE,requiredTime VARCHAR(255),caseDetail VARCHAR(255)) ",
+      " CREATE TABLE bloodRequest IF NOT EXISTS(id NOT NULL INT PRIMARY KEY AUTO_INCREMENT,userId INT,patientName VARCHAR(255),contactPerson VARCHAR(255),bloodGroup VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255),hospital VARCHAR(255),requiredPint INT,phone INT,requiredDate DATE,requiredTime VARCHAR(255),caseDetail VARCHAR(255),createdAt DATETIME DEFAULT CURRENT_TIMESTAMP) ",
       {
         type: QueryTypes.CREATE,
       }

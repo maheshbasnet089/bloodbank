@@ -15,7 +15,7 @@ exports.createAmbulance = async (req, res, next) => {
     return res.redirect(req.headers.referer || "/");
   }
   await sequelize.query(
-    " CREATE TABLE ambulance IF NOT EXISTS(id NOT NULL INT PRIMARY KEY AUTO_INCREMENT,userId INT,hospitalName VARCHAR(255),address VARCHAR(255),phone INT) ",
+    " CREATE TABLE ambulance IF NOT EXISTS(id NOT NULL INT PRIMARY KEY AUTO_INCREMENT,userId INT,hospitalName VARCHAR(255),address VARCHAR(255),phone INT,createdAt DATETIME DEFAULT CURRENT_TIMESTAMP) ",
     {
       type: QueryTypes.CREATE,
     }

@@ -39,7 +39,7 @@ exports.createEvent = async (req, res, next) => {
     return next(new AppError("Please provide all fields", 400));
   try {
     await sequelize.query(
-      `CREATE TABLE IF NOT EXISTS events(id NOT NULL PRIMARY KEY AUTO_INCREMENT,title VARCHAR(255),description VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255),time DATETIME,streetAddress VARCHAR(255), createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,date DATE`,
+      `CREATE TABLE IF NOT EXISTS events(id NOT NULL PRIMARY KEY AUTO_INCREMENT,title VARCHAR(255),description VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255),time DATETIME,streetAddress VARCHAR(255), createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,date DATE)`,
       {
         types: QueryTypes.CREATE,
       }

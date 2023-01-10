@@ -19,7 +19,7 @@ exports.createDonorHistory = async (req, res) => {
     return res.redirect("/");
   }
   await sequelize.query(
-    "CREATE TABLE IF NOT EXISTS donorHistory (id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,userId INT,name VARCHAR(255),date VARCHAR(255),pints VARCHAR(255),Case VARCHAR(255),bloodBankName VARCHAR(255)",
+    "CREATE TABLE IF NOT EXISTS donorHistory (id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,userId INT,name VARCHAR(255),date VARCHAR(255),pints VARCHAR(255),Case VARCHAR(255),bloodBankName VARCHAR(255),createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)",
     {
       type: QueryTypes.CREATE,
     }
