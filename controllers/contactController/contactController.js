@@ -6,16 +6,18 @@ const sendEmail = require("../../utils/email");
 const PDFDocument = require("pdfkit");
 
 const { QueryTypes, DataTypes } = require("sequelize");
-const sendEmail = require("../../utils/email");
 
 exports.postContactMessage = async (req, res, next) => {
   const { fullName, email, message } = req.body;
+  if (!fullName || !email || !message)
+    return next(new AppError("Please provide all fields", 400));
   await sequelize.query(
-    "CREATE TABLE IF NOT EXISTS contactMessage(id NOT NULL INT PRIMARY KEY AUTO_INCREMENT,fullName VARCHAR(255),email VARCHAR(255),message VARCHAR(255),createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)",
+    "CREATE TABLE IF NOT EXISTS contactMessage(id INT NOT NUll AUTO_INCREMENT PRIMARY KEY,fullName VARCHAR(255),email VARCHAR(255),message VARCHAR(255),createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)",
     {
       type: QueryTypes.CREATE,
     }
   );
+  console.log("hellow");
   await sequelize.query(
     "INSERT INTO contactMessage (fullName,email,message) VALUES(?,?,?)",
     {

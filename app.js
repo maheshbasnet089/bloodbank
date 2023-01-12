@@ -16,8 +16,15 @@ const bloodRequestRoute = require("./routes/bloodRequestRoute");
 const bookAppointmentRoute = require("./routes/bookAppointmentRoute");
 const ambulanceRoute = require("./routes/ambulanceRoute");
 const contactRoute = require("./routes/contactRoute");
+const homeRoute = require("./routes/homeRoute");
+const {
+  renderCreateEventPage,
+} = require("./controllers/event/eventController");
+const { restrictTo } = require("./utils/restrictTo");
+const { protectMiddleware } = require("./utils/isAuthenticated");
 
 //ejs and json configuration
+app.use(require("cookie-parser")());
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -43,12 +50,20 @@ app.use(session(sessionConfig));
 app.use(flash());
 
 app.use((req, res, next) => {
-  res.locals.currentUser = req.user;
+  // console.log(req.cookies.jwtToken);
+  res.locals.currentUser = req.cookies.jwtToken;
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
+  app.locals.shortenText = function (text, length) {
+    return text.substring(0, length);
+  };
   next();
 });
+
+// app.get("/", renderCreateEventPage);
+app.get("/createEvent", protectMiddleware, renderCreateEventPage);
 //routes
+app.use("/", homeRoute);
 app.use("/", authRoute);
 app.use("/events", eventRoute);
 app.use("/bloodBank", bloodBankRoute);
@@ -61,7 +76,8 @@ app.use("/contact", contactRoute);
 
 //error beside routes route
 app.all("*", (req, res, next) => {
-  res.status(404).send(`Cannot find the path ${req.originalUrl}`, 404);
+  const message = `Cannot find the path ${req.originalUrl}`;
+  res.render("error/pathError", { message });
 });
 
 module.exports = app;

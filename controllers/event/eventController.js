@@ -2,7 +2,6 @@ const db = require("../../model/index");
 const sequelize = db.sequelize;
 const User = db.users;
 const AppError = require("../../utils/appError");
-const { cloudinary } = require("../../cloudinary");
 
 const { QueryTypes, DataTypes } = require("sequelize");
 exports.renderCreateEventPage = async (req, res, next) => {
@@ -23,7 +22,8 @@ exports.createEvent = async (req, res, next) => {
   } = req.body;
   const madeBy = "Admin";
   const address = province + "," + district + " ," + localLevel;
-
+  const imagePath = req.file.filename;
+  // console.log(req.file);
   if (
     !title ||
     !madeBy ||
@@ -35,17 +35,18 @@ exports.createEvent = async (req, res, next) => {
     !district ||
     !time ||
     !streetAddress
-  )
-    return next(new AppError("Please provide all fields", 400));
+  ) {
+    return res.send("provide all fields");
+  }
   try {
     await sequelize.query(
-      `CREATE TABLE IF NOT EXISTS events(id NOT NULL PRIMARY KEY AUTO_INCREMENT,title VARCHAR(255),description VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255),time DATETIME,streetAddress VARCHAR(255), createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,date DATE)`,
+      `CREATE TABLE IF NOT EXISTS events(id INT NOT NUll AUTO_INCREMENT PRIMARY KEY,title VARCHAR(255),description VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255),time DATETIME,streetAddress VARCHAR(255),imagePath VARCHAR(255), createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,date DATE)`,
       {
         types: QueryTypes.CREATE,
       }
     );
     await sequelize.query(
-      "INSERT INTO events (title,description,address,phone,date,madeBy,province,district,localLevel,time,streetAddress) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO events (title,description,address,phone,date,province,district,localLevel,time,streetAddress,imagePath) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
       {
         types: QueryTypes.INSERT,
         replacements: [
@@ -54,17 +55,18 @@ exports.createEvent = async (req, res, next) => {
           address,
           phone,
           date,
-          madeBy,
+
           province,
           district,
           localLevel,
           time,
           streetAddress,
+          imagePath,
         ],
       }
     );
     req.flash("success", "Successfully made a new event!");
-    res.render("events/index", { events });
+    res.redirect("/events");
   } catch (error) {
     return res.json({
       status: 400,
@@ -77,7 +79,8 @@ exports.getEvents = async (req, res, next) => {
   const events = await sequelize.query(`SELECT * FROM events`, {
     types: QueryTypes.SELECT,
   });
-  res.render("events/index", { events });
+  console.log(events[0]);
+  res.render("home/index", { events });
 };
 
 exports.getIndividualEvent = async (req, res, next) => {

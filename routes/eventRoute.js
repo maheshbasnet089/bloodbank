@@ -9,17 +9,17 @@ const {
 } = require("../controllers/event/eventController");
 const router = express.Router();
 const catchAsync = require("../utils/catchAsync");
+const { storage, multer } = require("../utils/multerConfig");
 const { restrictTo } = require("../utils/restrictTo");
 // const { storage } = require("../cloudinary");
-// const multer = require("multer");
-// const upload = multer({ dest: "uploads/" });
+const upload = multer({ storage: storage });
 
-router.route("/new").get(renderCreateEventPage);
+// router.route("/new").get(renderCreateEventPage);
 router.route("/update").get(renderUpdateEventForm);
 router
   .route("/")
   .get(catchAsync(getEvents))
-  .post(restrictTo("admin"), catchAsync(createEvent));
+  .post(upload.single("image"), catchAsync(createEvent));
 router
   .route("/:id")
   .patch(restrictTo("admin"), catchAsync(updateEvent))

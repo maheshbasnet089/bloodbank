@@ -1,3 +1,149 @@
-<% layout('layouts/boilerplate')%>
+<!DOCTYPE html>
+<html lang="en">
 
-<h1>helllo from register</h1>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    
+    <link rel="stylesheet" href="style/header.css">
+
+    <link rel="stylesheet" href="style/global.css">
+
+    <link rel="stylesheet" href="style/register/register.css">
+</head>
+
+
+<body>
+    <%- include('../partials/navbar') %>
+    <div class="form-card">
+        <h2 class="form-title text-center">Create <span class="color-main">NBD </span>account</h2>
+        <p class="text-center">Save life of others by your blood.</p>
+        <div class="form-wrap">
+            <div class="form-left">
+                <img src="formImage.jpg" alt="" srcset="">
+            </div>
+            
+                <form class="form-right" action="/register" method="post" >
+                    <div class="form-row">
+                        <div class="form-field-wrap">
+                            <label>Full Name</label>
+                            <input type="text" placeholder="Full name" name="fullName">
+                        </div>
+    
+                        <div class="form-field-wrap">
+                            <label for="bloodGroup">Select Blood Group</label>
+    
+                            <select name="bloodGroup" id="bloodGroup">
+                                <option value=""></option>
+                                <option value="a+">A+</option>
+                                <option value="b">B</option>
+                                <option value="o+">O+</option>
+                                <option value="a-">A-</option>
+                            </select>
+                        </div>
+                    </div>
+    
+                    <div class="form-row">
+                        <div class="form-field-wrap">
+                            <label for="provience">Select Provience</label>
+                            <select name="province" id="provience">
+                                <option value=""></option>
+                                <option value="a+">Bagmati</option>
+                                <option value="b">Provience -2 </option>
+                                <option value="o+">Provience -2</option>
+                                <option value="a-">Provience -2</option>
+                            </select>
+                        </div>
+                        <div class="form-field-wrap">
+                            <label for="district">Select District</label>
+    
+                            <select name="district" id="district">
+                                <option value=""></option>
+                                <option value="Sunsari">Sunsari</option>
+                                <option value="Morang">Morang</option>
+                                <option value="Kathmandu">Kathmandu</option>
+                                <option value="Terhathum">Terhathum</option>
+                            </select>
+                        </div>
+                    </div>
+    
+                    <div class="form-row">
+                        <div class="form-field-wrap">
+                            <label for="localLevel">Local Level</label>
+                            <select name="localLevel" id="localLevel">
+                                <option value=""></option>
+                                <option value="level 1">level 1</option>
+                                <option value="level 2">level 2 </option>
+                                <option value="level 3">level 3</option>
+                                <option value="level 4">level 4
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-field-wrap">
+                            <label for="email">Email</label>
+                            <input type="text" placeholder="Email" name="email" id="email">
+                        </div>
+                    </div>
+    
+                    <div class="form-row">
+                        <div class="form-field-wrap">
+                            <label for="dbo">Date of Birth</label>
+                            <input type="date" name="dateOfBirth" id="dbo">
+                        </div>
+                        <div class="form-field-wrap">
+                            <label for="phone">Phone</label>
+                            <input type="text" placeholder="Phone" name="phone" id="phone">
+                        </div>
+                    </div>
+    
+                    <div class="form-row">
+                        <div class="form-field-wrap">
+                            <label for="password">Password</label>
+                            <input type="password" placeholder="Password" name="password" id="password">
+                        </div>
+                        <div class="form-field-wrap">
+                            <label for="confirmPassword">Confirm Password</label>
+                            <input type="text" name="passwordConfirm" placeholder="Confirm Password" id="confirmPassword">
+                        </div>
+                    </div>
+    
+                    <div class="form-row">
+                        <div class="form-field-wrap">
+                            <label for="gender">Gender</label>
+                            <select name="gender" id="gender">
+                                <option value="male">Male</option>
+                                <option value="female">Female </option>
+                                <option value="not to say">Not to say</option>
+    
+                            </select>
+                        </div>
+    
+                    </div>
+    
+    
+                    <div class="form-row-agree">
+                        <input type="checkbox" name="agree" id="agree">
+                        <p for="agree">I agree to all the <span><a href="#" class="color-light">Terms and conditions</a></span></p>
+                    </div>
+                    <div class="form-row">
+                        <button type="submit" class="btn-submit">Create Account</button>
+                    </div>
+                    <div class="form-row">
+                     <p>I'm already a member. <span><a href="#" class="color-light">Log In</a></span></p>
+                    </div>
+    
+    
+    
+    
+                </div>
+            </div>
+         
+    </div>
+</body>
+<script>
+
+</script>
+
+</html>

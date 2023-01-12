@@ -22,16 +22,18 @@ const cookieOptions = {
 };
 
 //CREATING TOKEN AS WELL SENDING THE TOKEN IN COOKIE
-const createToken = (user, statusCode, res) => {
+const createToken = (user, statusCode, res, req) => {
   // console.log(user.id);
   const token = signInToken(user.id);
 
   //send cookie in response
   res.cookie("jwtToken", token, cookieOptions);
   user.password = undefined;
-  res.status(statusCode).redirect("/dashboard");
+  req.flash("success", "Logged in successfully");
+  res.redirect("/");
 };
 exports.renderRegister = (req, res) => {
+  req.flash("success", "Welcome to the register page");
   res.render("auth/register");
 };
 exports.createUser = async (req, res, next) => {
@@ -46,19 +48,28 @@ exports.createUser = async (req, res, next) => {
     phone,
     gender,
     password,
+    passwordConfirm,
+    agree,
   } = req.body;
+  const role = req.body.role || "patient";
+
+  if (agree !== "on") return res.send("Agree all the terms");
   if (
     !fullName ||
     !bloodGroup ||
-    !province ||
-    !district ||
-    !localLevel ||
     !email ||
     !dateOfBirth ||
     !phone ||
-    !password
-  )
-    return next(new AppError("Please provide all the fields", 400));
+    !password ||
+    !passwordConfirm
+  ) {
+    return res.send("please provide all fields");
+  }
+  if (password.toLowerCase() !== passwordConfirm.toLowerCase()) {
+    req.flash("error", "Password and confirm password does not match");
+    return res.send("password and passwordConfirm don't match");
+    // return res.redirect("/register");
+  }
   const phoneExist = await User.findOne({
     where: { phone: phone },
   });
@@ -76,8 +87,13 @@ exports.createUser = async (req, res, next) => {
     email,
     dateOfBirth,
     phone,
+    password,
   });
-  if (user) res.redirect("/login");
+  console.log(user);
+  if (user) {
+    req.flash("success", "User created successfully");
+    return res.redirect("/login");
+  }
 };
 
 exports.renderLogin = (req, res) => {
@@ -85,13 +101,22 @@ exports.renderLogin = (req, res) => {
 };
 
 exports.loginUser = async (req, res, next) => {
-  const { phone, password } = req.body;
-  if (!phone || !password)
-    return next(new AppError("Please provide phone and password", 400));
+  const { email, password } = req.body;
+  console.log(req.body);
+  if (!email || !password) return res.send("Please provide phone and password");
   const user = await User.findOne({
-    where: { phone: phone },
+    where: { email: email },
   });
-  if (!user || !(await user.comparePassword(password)))
-    return next(new AppError("Incorrect phone or password", 400));
-  createToken(user, 200, res);
+  if (!user || !(await user.comparePassword(password))) {
+    // return req.flash("error", "Invalid username or password");
+    return next(new AppError("Invalid username or password", 400));
+  }
+
+  createToken(user, 200, res, req);
+};
+
+exports.logOut = async (req, res) => {
+  res.clearCookie("jwtToken");
+  req.flash("success", "Logged out successfully");
+  res.redirect("/");
 };

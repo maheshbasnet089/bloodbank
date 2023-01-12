@@ -41,27 +41,28 @@ module.exports = (sequelize, DataTypes, bcrypt, crypto) => {
     },
     province: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     district: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     localLevel: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     dateOfBirth: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
     },
     donatedDate: {
       type: DataTypes.DATE,
       allowNull: true,
     },
     availiabilityStatus: {
-      type: DataTypes.ENUM("yes", "no"),
-      defaultValues: "yes",
+      // type: DataTypes.ENUM("yes", "no"),
+      type: DataTypes.STRING,
+      defaultValue: "yes",
     },
 
     passwordResetToken: DataTypes.STRING,

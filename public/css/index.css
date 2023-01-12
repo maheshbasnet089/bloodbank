@@ -1,9 +1,0 @@
-:root {
-    --mainColor : #E03455;
-    --mainColorLight : #de546f;
-    --textColor : #404040;
-}
-
-h1{
-    color : var(--textColor)
-}
