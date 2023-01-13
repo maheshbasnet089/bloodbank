@@ -50,8 +50,9 @@ exports.protectMiddleware = async (req, res, next) => {
   }
 
   if (!token) {
-    return res.status(400).json({
-      message: "You must be logged In",
+    return res.render("error/pathError", {
+      message: "You must be logged In!!",
+      code: 401,
     });
   }
 
@@ -60,8 +61,9 @@ exports.protectMiddleware = async (req, res, next) => {
 
   const loggedInUser = await User.findOne({ where: { id: decoded.id } });
   if (!loggedInUser) {
-    return res.status(400).json({
-      message: "You are not the user belonging to this token",
+    return res.render("error/pathError", {
+      message: "You are not user belonging to this token",
+      code: 400,
     });
   }
   req.user = loggedInUser;

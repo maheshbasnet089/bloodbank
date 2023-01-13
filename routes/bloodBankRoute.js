@@ -10,6 +10,7 @@ const {
 
 const router = express.Router();
 const catchAsync = require("../utils/catchAsync");
+const { protectMiddleware } = require("../utils/isAuthenticated");
 const { restrictTo } = require("../utils/restrictTo");
 
 router.route("/new").get(renderCreateBloodBank);
@@ -17,7 +18,7 @@ router.route("/update").get(renderUpdateBloodBankForm);
 router
   .route("/")
   .get(catchAsync(getBloodBanks))
-  .post(restrictTo("admin"), catchAsync(createBloodBank));
+  .post(protectMiddleware, catchAsync(createBloodBank));
 router
   .route("/:id")
   .patch(restrictTo("admin"), catchAsync(updateBloodBank))

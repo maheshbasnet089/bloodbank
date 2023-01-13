@@ -10,11 +10,16 @@ exports.renderCreateBloodBank = async (req, res, next) => {
 };
 exports.createBloodBank = async (req, res, next) => {
   const { name, address, phone } = req.body;
+
   if (!name || !address || !phone)
-    return next(new AppError("Please provide all fields", 400));
+    return res.render("error/pathError", {
+      message: "Please provide all fields",
+      code: 400,
+    });
+
   try {
     await sequelize.query(
-      `CREATE TABLE bloodBank IF NOT EXISTS (id NOT NULL PRIMARY KEY AUTO_INCREMENT,name,address,phone,createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)`,
+      `CREATE TABLE  IF NOT EXISTS bloodBank(id INT NOT NUll AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)`,
       {
         type: QueryTypes.CREATE,
       }
@@ -30,7 +35,7 @@ exports.createBloodBank = async (req, res, next) => {
 
     res.redirect("/bloodBank");
   } catch (error) {
-    res.render("error", { error });
+    return res.render("error/pathError", { message: error, code: 400 });
   }
 };
 
@@ -38,7 +43,8 @@ exports.getBloodBanks = async (req, res, next) => {
   const bloodBanks = await sequelize.query(`SELECT * FROM bloodBank`, {
     type: QueryTypes.SELECT,
   });
-  res.render("bloodBanks/index", { bloodBanks });
+  console.log(bloodBanks);
+  res.render("bloodBank/index", { bloodBanks });
 };
 
 exports.getBloodBank = async (req, res, next) => {

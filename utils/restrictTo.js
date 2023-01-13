@@ -9,9 +9,10 @@ exports.restrictTo = (...roles) => {
   return (req, res, next) => {
     console.log(req.user);
     if (!roles.includes(req.user.role)) {
-      return next(
-        new AppError("You don't have permission to do that action ", 403)
-      );
+      return res.render("error/pathError", {
+        message: "You don't have permission to do that",
+        code: 401,
+      });
     }
     next();
   };

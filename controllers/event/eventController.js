@@ -92,7 +92,8 @@ exports.getIndividualEvent = async (req, res, next) => {
     req.flash("error", "Cannot find that campground!");
     return res.redirect("/events");
   }
-  res.render("events/showIndividual", { event });
+
+  res.render("events/showIndividual", { event: event[0][0] });
 };
 
 exports.renderUpdateEventForm = async (req, res, next) => {

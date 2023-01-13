@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+     <!-- fontawesome  -->
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+     <link rel="stylesheet" href="/style/login.css">
+     <link rel="stylesheet" href="/style/register/register.css">
+     <link rel="stylesheet" href="/style/global.css">
+</head>
+<body>
+    <div class="login-wrap">
+        <h1 class="section-title">
+            Add <span class="color-main ">Blood Bank</span>
+        </h1>
+        <div class="form-card">
+            <form action="/bloodBank" method="post">
+                <div class="form-row">
+                    <div class="form-field-wrap"><input type="text" required placeholder="Hospital Name" class="" name="name" ></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field-wrap"><input type="text" required placeholder="Address" class="" name="address" ></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field-wrap"><input type="text" required placeholder="Phone" class="" name="phone"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field-wrap">
+                        <button type="submit" class="btn-primary">Add</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

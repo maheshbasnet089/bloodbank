@@ -54,7 +54,7 @@ app.use((req, res, next) => {
   res.locals.currentUser = req.cookies.jwtToken;
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
-  app.locals.shortenText = function (text, length) {
+  res.locals.shortenText = function (text, length) {
     return text.substring(0, length);
   };
   next();
