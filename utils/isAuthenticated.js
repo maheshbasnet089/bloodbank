@@ -43,10 +43,7 @@ exports.protectMiddleware = async (req, res, next) => {
   if (authorizatonHeader && authorizatonHeader.startsWith("Bearer")) {
     token = authorizatonHeader.split(" ")[1];
   } else {
-    // token = JSON.parse(localStorage.getItem("token"));
     token = jwtToken;
-
-    // console.log("Token", token);
   }
 
   if (!token) {

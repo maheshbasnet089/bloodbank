@@ -51,7 +51,7 @@ exports.createUser = async (req, res, next) => {
     passwordConfirm,
     agree,
   } = req.body;
-  const role = req.body.role || "patient";
+  const role = req.body.role || "donor";
 
   if (agree !== "on")
     return res.render("error/pathError", {
@@ -82,10 +82,12 @@ exports.createUser = async (req, res, next) => {
   const phoneExist = await User.findOne({
     where: { phone: phone },
   });
+  console.log(phoneExist);
   const emailExist = await User.findOne({
     where: { email: email },
   });
-  if (phoneExist || emailExist)
+  console.log(emailExist);
+  if (phoneExist && emailExist)
     return res.render("error/pathError", {
       message: "User already exists",
       code: 400,
@@ -100,8 +102,9 @@ exports.createUser = async (req, res, next) => {
     dateOfBirth,
     phone,
     password,
+    role,
   });
-  console.log(user);
+
   if (user) {
     req.flash("success", "User created successfully");
     return res.redirect("/login");

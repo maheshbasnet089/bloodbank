@@ -1,1 +1,131 @@
-<h1>from blood request</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Request</title>
+    <link rel="stylesheet" href="/style/register/register.css">
+    <link rel="stylesheet" href="/style/header.css">
+    <link rel="stylesheet" href="/style/global.css">
+
+
+    <!-- bs  -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script> -->
+<style>
+    textarea{
+        width: 90%;
+        padding: 5px 3px;
+    }
+</style>
+</head>
+<body>
+    <% if(!currentUser) { %>
+        <%- include('../error/loginError') %>
+        
+        <% }else{ %>
+            
+            <%- include('../partials/navbar') %>
+
+    <div class="form-card" style="padding-top: 100px;">
+        <h2 class="form-title text-center">Add <span class="color-main">Blood </span>Request</h2>
+        <p class="text-center">Save life of others by your blood.</p>
+        <div class="form-wrap">
+            <div class="form-left">
+                <img src="/bloodRequest.png" alt="" srcset="">
+            </div>
+            <form action="/bloodRequest" method="post" class="form-right">
+                <div class="form-row">
+                    <div class="form-field-wrap">
+                        <label>Patient Name</label>
+                        <input name="patientName"  required type="text" placeholder="Patient Name">
+                    </div>
+                    <div class="form-field-wrap">
+                        <label>Contact Person</label>
+                        <input name="contactPerson" required type="text" placeholder="Contact Person">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field-wrap">
+                        <label for="provience">Select Blood Group</label>
+                        <select name="bloodGroup" required id="provience">
+                            <option value="bagmati">o</option>
+                            <option value="provience 2">negative</option>
+                            <option value="provience 3">Provience -3</option>
+                            <option value="provience 4">Provience -4</option>
+                        </select>
+                    </div>
+                    <div class="form-field-wrap">
+                        <label for="provience">Select Provience</label>
+                        <select name="province" required id="provience">
+                            <option value="Sunsari">Sunsari</option>
+                            <option value="Morang">Morang</option>
+                            <option value="Kathmandu">Kathmandu</option>
+                            <option value="Terhathum">Terhathum</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field-wrap">
+                        <label for="district">Select District</label>
+                        <select name="district" required id="district">
+                            <option value="Sunsari">Sunsari</option>
+                            <option value="Morang">Morang</option>
+                            <option value="Kathmandu">Kathmandu</option>
+                            <option value="Terhathum">Terhathum</option>
+                        </select>
+                    </div>
+                    <div class="form-field-wrap">
+                        <label for="localLevel">Local Level</label>
+                        <select name="localLevel" required id="localLevel">
+                            <option value="level 1">level 1</option>
+                            <option value="level 2">level 2 </option>
+                            <option value="level 3">level 3</option>
+                            <option value="level 4">level 4
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field-wrap">
+                        <label for="hospital">Hospital</label>
+                        <input type="text" required name="hospital" id="hospital">
+                    </div>
+                    <div class="form-field-wrap">
+                        <label for="pint">Required Pint</label>
+                        <input type="text" placeholder="Required pint" name="requiredPint" id="pint" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field-wrap">
+                        <label for="phone">Phone</label>
+                        <input type="text" required name="phone" placeholder="Phone" id="phone">
+                    </div>
+                    <div class="form-field-wrap">
+                        <label for="date">Required Date</label>
+                        <input type="date" required name="requiredDate" placeholder="Required Date" id="date">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field-wrap">
+                        <label for="time">Required Time</label>
+                        <input type="time" required name="requiredTime" placeholder="Time" id="time">
+                    </div>
+                    <div class="form-field-wrap">
+                        <label for="time">Case Details</label>
+                        <textarea rows="3" required name="caseDetail" cols="10" placeholder="Case details.." id="time">
+                        </textarea>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <button type="submit" class="btn-submit">Proceed</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <% } %>
+</body>
+<script>
+</script>
+</html>

@@ -36,48 +36,47 @@ exports.createBloodRequest = async (req, res, next) => {
     !requiredDate ||
     !requiredTime ||
     !caseDetail
-  ) {
-    req.flash("error", "Please fill all the fields");
-    res.redirect(req.headers.referer || "/");
-    await sequelize.query(
-      " CREATE TABLE bloodRequest IF NOT EXISTS(id NOT NULL INT PRIMARY KEY AUTO_INCREMENT,userId INT,patientName VARCHAR(255),contactPerson VARCHAR(255),bloodGroup VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255),hospital VARCHAR(255),requiredPint INT,phone INT,requiredDate DATE,requiredTime VARCHAR(255),caseDetail VARCHAR(255),createdAt DATETIME DEFAULT CURRENT_TIMESTAMP) ",
-      {
-        type: QueryTypes.CREATE,
-      }
-    );
-    await sequelize.query(
-      " INSERT INTO bloodRequest (userId,patientName,contactPerson,bloodGroup,province,district,localLevel,hospital,requiredPint,phone,requiredDate,requiredTime,caseDetail) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?) ",
-      {
-        type: QueryTypes.INSERT,
-        replacements: [
-          userId,
-          patientName,
-          contactPerson || null,
-          bloodGroup,
-          province,
-          district,
-          localLevel,
-          hospital,
-          requiredPint,
-          phone,
-          requiredDate,
-          requiredTime,
-          caseDetail,
-        ],
-      }
-    );
-    req.flash("success", "Blood request created successfully");
-    res.redirect("/bloodRequest");
-  }
-};
-exports.getBloodRequests = async (req, res, next) => {
-  const bloodRequests = await sequelize.query(
-    "SELECT * FROM bloodRequest WHERE userId = ?",
+  )
+    return res.render("error/pathError", {
+      message: "Please provide all fields",
+      code: 400,
+    });
+
+  await sequelize.query(
+    "CREATE TABLE  IF NOT EXISTS bloodRequest(id INT NOT NUll AUTO_INCREMENT PRIMARY KEY,userId INT,patientName VARCHAR(255),contactPerson VARCHAR(255),bloodGroup VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255),hospital VARCHAR(255),requiredPint INT,phone INT,requiredDate DATE,requiredTime VARCHAR(255),caseDetail VARCHAR(255),createdAt DATETIME DEFAULT CURRENT_TIMESTAMP) ",
     {
-      type: QueryTypes.SELECT,
-      replacements: [req.user.id],
+      type: QueryTypes.CREATE,
     }
   );
+  await sequelize.query(
+    " INSERT INTO bloodRequest (userId,patientName,contactPerson,bloodGroup,province,district,localLevel,hospital,requiredPint,phone,requiredDate,requiredTime,caseDetail) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?) ",
+    {
+      type: QueryTypes.INSERT,
+      replacements: [
+        userId,
+        patientName,
+        contactPerson || null,
+        bloodGroup,
+        province,
+        district,
+        localLevel,
+        hospital,
+        requiredPint,
+        phone,
+        requiredDate,
+        requiredTime,
+        caseDetail,
+      ],
+    }
+  );
+  req.flash("success", "Blood request created successfully");
+  res.redirect("/bloodRequest");
+};
+exports.getBloodRequests = async (req, res, next) => {
+  const bloodRequests = await sequelize.query("SELECT * FROM bloodRequest", {
+    type: QueryTypes.SELECT,
+  });
+  // console.log(bloodRequests);
   res.render("bloodRequest/bloodRequest", { bloodRequests });
 };
 

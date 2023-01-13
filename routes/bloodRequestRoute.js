@@ -7,12 +7,14 @@ const {
   renderBloodRequestForm,
 } = require("../controllers/bloodRequest/bloodRequest");
 const catchAsync = require("../utils/catchAsync");
+const { protectMiddleware } = require("../utils/isAuthenticated");
+const { restrictTo } = require("../utils/restrictTo");
 const router = express.Router();
 
 router.route("/new").get(renderBloodRequestForm);
 router
   .route("/")
-  .post(catchAsync(createBloodRequest))
+  .post(protectMiddleware, restrictTo("donor"), catchAsync(createBloodRequest))
   .get(catchAsync(getBloodRequests));
 router
   .route("/:id")
