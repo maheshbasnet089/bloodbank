@@ -80,7 +80,7 @@ exports.getEvents = async (req, res, next) => {
     types: QueryTypes.SELECT,
   });
   console.log(events[0]);
-  res.render("home/index", { events });
+  res.render("events/index", { events: events[0] });
 };
 
 exports.getIndividualEvent = async (req, res, next) => {

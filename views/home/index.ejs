@@ -13,12 +13,19 @@
                         ''Blood for Nepal''</span> <span class="color-light"> an online platform that creates a bridge
                         between a voluntary donar and a potential beneficiary.</span>
                 </p>
-
                 <div class="hero-call-to-action-wrap">
+                    <% if(!currentUser){ %>
                     <span><a href="register"><button
                                 class="btn-primary btn-radius btn-hero-register hover-transition">Register</button></a></span>
                     <span><a href="registerForm.html"><button class="btn-hero-know-more">Know More</button></a></span>
-                </div>
+                    <% }else{ %>
+                    
+                    <span><a href="findBlood"><button
+                        class="btn-primary btn-radius btn-hero-register hover-transition">Find Blood</button></a></span>
+                        <span><a href="registerForm.html"><button class="btn-hero-know-more">Know More</button></a></span>
+                        
+                        <% } %>
+                    </div>
                 <p class="text-donate-now">
                     'Donate now & be the reason for someone heartbeat:)'
                 </p>

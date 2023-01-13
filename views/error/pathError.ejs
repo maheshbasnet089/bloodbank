@@ -37,7 +37,7 @@ body{
 #error-code{
     font-weight: 900;
     font-size: 150px;
-    background-color: #0078FF;
+    background-color: #DE546F;
     /* background: -webkit-linear-gradient(#CF3CBC, #0078FF); */
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -55,7 +55,7 @@ body{
     padding: 15px 20px;
     border-radius: 10px;
     border: none;
-    background-color: #0078FF;
+    background-color: #DE546F;
     /* background: -webkit-linear-gradient(#A0799B, #0078FF); */
     color: white;
     cursor: pointer;
@@ -77,10 +77,11 @@ body{
 </head>
 <body>
     <div class="container">
-        <h1 id="error-code">404!</h1>
+        <h1 id="error-code"><%=code %></h1>
         <p id="error-description"><%=message %></p>
-        <p id="error-detail">You are on a wrong path.</p>
-        <a href="/"><button id="btn-back">Go Back to Home</button></a>
+     
+        <a href="#" onclick="window.history.back()"
+        ><button id="btn-back">Go Back </button></a>
     </div>
 </body>
 </html>

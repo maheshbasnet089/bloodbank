@@ -77,7 +77,7 @@ app.use("/contact", contactRoute);
 //error beside routes route
 app.all("*", (req, res, next) => {
   const message = `Cannot find the path ${req.originalUrl}`;
-  res.render("error/pathError", { message });
+  res.render("error/pathError", { message, code: 404 });
 });
 
 module.exports = app;

@@ -53,7 +53,11 @@ exports.createUser = async (req, res, next) => {
   } = req.body;
   const role = req.body.role || "patient";
 
-  if (agree !== "on") return res.send("Agree all the terms");
+  if (agree !== "on")
+    return res.render("error/pathError", {
+      message: "Agree terms and policy to continue",
+      code: 400,
+    });
   if (
     !fullName ||
     !bloodGroup ||
@@ -63,11 +67,16 @@ exports.createUser = async (req, res, next) => {
     !password ||
     !passwordConfirm
   ) {
-    return res.send("please provide all fields");
+    return res.render("error/pathError", {
+      message: "Fill all the fields",
+      code: 400,
+    });
   }
   if (password.toLowerCase() !== passwordConfirm.toLowerCase()) {
-    req.flash("error", "Password and confirm password does not match");
-    return res.send("password and passwordConfirm don't match");
+    return res.render("error/pathError", {
+      message: "password and passwordConfirm doesn't match",
+      code: 400,
+    });
     // return res.redirect("/register");
   }
   const phoneExist = await User.findOne({
@@ -77,7 +86,10 @@ exports.createUser = async (req, res, next) => {
     where: { email: email },
   });
   if (phoneExist || emailExist)
-    return next(new AppError("User already exist", 400));
+    return res.render("error/pathError", {
+      message: "User already exists",
+      code: 400,
+    });
   const user = await User.create({
     fullName,
     bloodGroup,
@@ -102,14 +114,20 @@ exports.renderLogin = (req, res) => {
 
 exports.loginUser = async (req, res, next) => {
   const { email, password } = req.body;
-  console.log(req.body);
-  if (!email || !password) return res.send("Please provide phone and password");
+
+  if (!email || !password)
+    return res.render("error/pathError", {
+      message: "Please provide email and password",
+      code: 400,
+    });
   const user = await User.findOne({
     where: { email: email },
   });
   if (!user || !(await user.comparePassword(password))) {
-    // return req.flash("error", "Invalid username or password");
-    return next(new AppError("Invalid username or password", 400));
+    return res.render("error/pathError", {
+      message: "Incorrect email or password",
+      code: 400,
+    });
   }
 
   createToken(user, 200, res, req);

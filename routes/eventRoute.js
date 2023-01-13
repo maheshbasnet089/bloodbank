@@ -6,6 +6,7 @@ const {
   updateEvent,
   renderCreateEventPage,
   renderUpdateEventForm,
+  getIndividualEvent,
 } = require("../controllers/event/eventController");
 const router = express.Router();
 const catchAsync = require("../utils/catchAsync");
@@ -22,6 +23,7 @@ router
   .post(upload.single("image"), catchAsync(createEvent));
 router
   .route("/:id")
+  .get(catchAsync(getIndividualEvent))
   .patch(restrictTo("admin"), catchAsync(updateEvent))
   .delete(restrictTo("admin"), catchAsync(deleteEvent));
 
