@@ -11,7 +11,7 @@
             <span class="links"><a href="/events">Events</a></span>
             <span class="links"><a href="/bloodBank">Blood Banks</a></span>
             <span class="links"><a href="/bloodRequest">Blood Requests</a></span>
-            <span class="links"><a href="home.html">Find Blood</a></span>
+            <span class="links"><a href="/donor">Find Blood</a></span>
             <span class="links"><a href="Blog.html">Contact</a></span>
 
             <% if(!currentUser) {%>
@@ -20,6 +20,8 @@
             <span><a href="register"><button
                         class="nav-btn btn-register btn-radius hover-transition">Register</button></a></span>
                         <% } else {%>
+            <span class="links"><a href="/profile">Dashboard</a></span>
+
                             <span><a href="logOut"><button
                                 class="nav-btn btn-login btn-radius hover-transition">Logout</button></a></span>
 

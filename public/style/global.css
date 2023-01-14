@@ -4,6 +4,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    
 
 }
 
@@ -36,6 +37,9 @@ div,header,nav {
 body {
     font-family: 'Poppins', sans-serif;
     height: 100vh;
+    background-image: radial-gradient(#E03455 0.5px, #fefefe 0.5px);
+    background-color: #fefefe;
+    /* background-image: radial-gradient(#E03455 0.5px, #fefefe 0.5px); */
 }
 
 input,

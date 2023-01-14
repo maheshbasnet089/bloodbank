@@ -22,6 +22,10 @@ const {
 } = require("./controllers/event/eventController");
 const { restrictTo } = require("./utils/restrictTo");
 const { protectMiddleware } = require("./utils/isAuthenticated");
+const {
+  renderCreateBloodBank,
+} = require("./controllers/bloodBank/bloodBankController");
+const { sequelize } = require("./model");
 
 //ejs and json configuration
 app.use(require("cookie-parser")());
@@ -54,14 +58,49 @@ app.use((req, res, next) => {
   res.locals.currentUser = req.cookies.jwtToken;
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
+  res.locals.user = req.user;
   res.locals.shortenText = function (text, length) {
     return text.substring(0, length);
   };
+
   next();
 });
 
 // app.get("/", renderCreateEventPage);
-app.get("/createEvent", protectMiddleware, renderCreateEventPage);
+app.get(
+  "/admin/dashboard/createEvent",
+  protectMiddleware,
+  restrictTo("admin"),
+  renderCreateEventPage
+);
+app.get(
+  "/admin/dashboard/createBloodBank",
+  protectMiddleware,
+  restrictTo("admin"),
+  renderCreateBloodBank
+);
+
+app.get("/districts", async (req, res) => {
+  const districts = await sequelize.query(
+    "SELECT * FROM districts WHERE province_id=? ",
+    {
+      replacements: [req.query.province_id],
+      type: sequelize.QueryTypes.SELECT,
+    }
+  );
+  res.json(districts);
+});
+app.get("/districtsByName", async (req, res) => {
+  const districtsByName = await sequelize.query(
+    "SELECT districts.name FROM districts LEFT JOIN provinces p ON p.id = districts.province_id WHERE p.name=? ",
+    {
+      replacements: [req.query.name],
+      type: sequelize.QueryTypes.SELECT,
+    }
+  );
+  console.log(districtsByName);
+  res.json(districtsByName);
+});
 //routes
 app.use("/", homeRoute);
 app.use("/", authRoute);

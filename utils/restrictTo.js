@@ -7,11 +7,10 @@ const User = db.users;
 
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
-    console.log(req.user);
     if (!roles.includes(req.user.role)) {
       return res.render("error/pathError", {
         message: "You don't have permission to do that",
-        code: 401,
+        code: 403,
       });
     }
     next();

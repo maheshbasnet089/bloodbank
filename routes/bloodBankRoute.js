@@ -13,7 +13,9 @@ const catchAsync = require("../utils/catchAsync");
 const { protectMiddleware } = require("../utils/isAuthenticated");
 const { restrictTo } = require("../utils/restrictTo");
 
-router.route("/new").get(renderCreateBloodBank);
+// router
+//   .route("/new")
+//   .get(protectMiddleware, restrictTo("admin"), renderCreateBloodBank);
 router.route("/update").get(renderUpdateBloodBankForm);
 router
   .route("/")

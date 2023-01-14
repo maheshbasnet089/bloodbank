@@ -6,6 +6,8 @@ const { createHmac } = require("crypto");
 const sendEmail = require("../../utils/email");
 const { Op } = require("sequelize");
 const AppError = require("./../../utils/appError");
+const { sequelize } = require("../../model/index");
+const schedule = require("node-schedule");
 
 ///SIGN IN JWT TOKEN
 const signInToken = (id) => {
@@ -32,9 +34,13 @@ const createToken = (user, statusCode, res, req) => {
   req.flash("success", "Logged in successfully");
   res.redirect("/");
 };
-exports.renderRegister = (req, res) => {
-  req.flash("success", "Welcome to the register page");
-  res.render("auth/register");
+exports.renderRegister = async (req, res) => {
+  const provinces = await sequelize.query(" SELECT * FROM provinces ", {
+    type: sequelize.QueryTypes.SELECT,
+  });
+  console.log(provinces);
+
+  res.render("auth/register", { provinces });
 };
 exports.createUser = async (req, res, next) => {
   const {
@@ -52,6 +58,7 @@ exports.createUser = async (req, res, next) => {
     agree,
   } = req.body;
   const role = req.body.role || "donor";
+  const availiabilityStatus = "available";
 
   if (agree !== "on")
     return res.render("error/pathError", {
@@ -77,21 +84,21 @@ exports.createUser = async (req, res, next) => {
       message: "password and passwordConfirm doesn't match",
       code: 400,
     });
-    // return res.redirect("/register");
   }
   const phoneExist = await User.findOne({
     where: { phone: phone },
   });
-  console.log(phoneExist);
+
   const emailExist = await User.findOne({
     where: { email: email },
   });
-  console.log(emailExist);
-  if (phoneExist && emailExist)
+
+  if (phoneExist && emailExist) {
     return res.render("error/pathError", {
       message: "User already exists",
       code: 400,
     });
+  }
   const user = await User.create({
     fullName,
     bloodGroup,
@@ -103,8 +110,44 @@ exports.createUser = async (req, res, next) => {
     phone,
     password,
     role,
+    availiabilityStatus,
   });
 
+  await sequelize.query(
+    "CREATE TABLE IF NOT EXISTS roleExpiration(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,userId INT REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,expirationDate DATE )",
+    {
+      type: sequelize.QueryTypes.CREATE,
+    }
+  );
+  const expiration_date = new Date();
+  expiration_date.setDate(expiration_date.getDate() + 30);
+  await sequelize.query(
+    " INSERT INTO roleExpiration(userId,expirationDate) VALUES(?,?)",
+    {
+      replacements: [user.id, expiration_date],
+      type: sequelize.QueryTypes.INSERT,
+    }
+  );
+
+  const job = schedule.scheduleJob("0 0 * * * *", async function () {
+    try {
+      const expiredRoleExpirations = await sequelize.query(
+        `SELECT * FROM roleExpiration 
+        WHERE expirationDate < CURRENT_DATE`,
+        { type: sequelize.QueryTypes.SELECT }
+      );
+      for (const expiredRoleExpiration of expiredRoleExpirations) {
+        await sequelize.query(
+          `UPDATE users SET availiabilityStatus = 'Not available' 
+            WHERE id = ${expiredRoleExpiration.userId}`,
+          { type: sequelize.QueryTypes.UPDATE }
+        );
+      }
+      console.log(`${expiredRoleExpirations.length} expired roles updated`);
+    } catch (error) {
+      console.error(error);
+    }
+  });
   if (user) {
     req.flash("success", "User created successfully");
     return res.redirect("/login");
@@ -140,4 +183,69 @@ exports.logOut = async (req, res) => {
   res.clearCookie("jwtToken");
   req.flash("success", "Logged out successfully");
   res.redirect("/");
+};
+
+exports.getMe = async (req, res, next) => {
+  const user = await User.findByPk(req.user.id);
+  if (!user) {
+    return res.render("error/pathError", {
+      message: "User not found",
+      code: 400,
+    });
+  }
+  const history = await sequelize.query(
+    `SELECT * FROM history WHERE userId = ${user.id}`,
+    { type: sequelize.QueryTypes.SELECT }
+  );
+  const totalAmount = await sequelize.query(
+    `SELECT SUM(amount) FROM history WHERE userId = ${user.id}`,
+    { type: sequelize.QueryTypes.SELECT }
+  );
+  console.log(history, totalAmount[0]["SUM(amount)"]);
+  res.status(200).render("auth/profile", {
+    user,
+    history,
+    totalAmount: totalAmount[0]["SUM(amount)"] || 0,
+  });
+};
+
+exports.renderAddToHistory = async (req, res, next) => {
+  res.render("auth/addToHistory");
+};
+
+exports.createAddToHistory = async (req, res, next) => {
+  const { name, date, amount, caseDetail } = req.body;
+  if (!name || !date || !amount || !caseDetail)
+    return res.render("error/pathError", {
+      message: "Please provide all the fields",
+      code: 400,
+    });
+
+  await sequelize.query(
+    " CREATE TABLE IF NOT EXISTS history(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,userId INT REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,name VARCHAR(255),date DATE,amount INT,caseDetail VARCHAR(255))",
+    {
+      type: sequelize.QueryTypes.CREATE,
+    }
+  );
+  await sequelize.query(
+    " INSERT INTO history(userId,name,date,amount,caseDetail) VALUES(?,?,?,?,?)",
+    {
+      replacements: [req.user.id, name, date, amount, caseDetail],
+      type: sequelize.QueryTypes.INSERT,
+    }
+  );
+  res.redirect("/profile");
+};
+
+exports.renderAdminDashboard = async (req, res, next) => {
+  const users = await User.findAll();
+  const user = await User.findByPk(req.user.id);
+  const events = await sequelize.query(`SELECT * FROM events`, {
+    type: sequelize.QueryTypes.SELECT,
+  });
+  const bloodBanks = await sequelize.query(`SELECT * FROM bloodBank`, {
+    type: sequelize.QueryTypes.SELECT,
+  });
+
+  res.render("auth/adminDashboard", { user, users, events, bloodBanks });
 };

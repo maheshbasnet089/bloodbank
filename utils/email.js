@@ -14,7 +14,8 @@ const sendEmail = async (options) => {
     from: "Mahesh Basnet <basnetmanish089@gmail.com>",
     to: options.email,
     subject: options.subject,
-    text: options.message,
+    text: "Here is the form you submitted for book apppointment",
+    attachments: options.message,
   };
 
   await transporter.sendMail(mailOptions);

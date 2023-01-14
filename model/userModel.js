@@ -62,7 +62,7 @@ module.exports = (sequelize, DataTypes, bcrypt, crypto) => {
     availiabilityStatus: {
       // type: DataTypes.ENUM("yes", "no"),
       type: DataTypes.STRING,
-      defaultValue: "yes",
+      defaultValue: "available",
     },
 
     passwordResetToken: DataTypes.STRING,

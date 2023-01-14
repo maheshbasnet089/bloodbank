@@ -75,11 +75,49 @@ exports.createDonor = async (req, res, next) => {
 };
 
 exports.getDonors = async (req, res, next) => {
-  const donors = await sequelize.query("SELECT * FROM donor", {
-    type: QueryTypes.SELECT,
-  });
+  const bloodGroup = req.query.bloodGroup;
+  const district = req.query.district;
+  const localLevel = req.query.localLevel;
 
-  res.render("donors/index", { donors });
+  let users;
+  if (!bloodGroup && !district && !localLevel) {
+    // if no query parameters are provided, retrieve all users
+    users = await User.findAll();
+  } else if (!bloodGroup && !district) {
+    // if only the localLevel parameter is provided, filter by localLevel
+    users = await User.findAll({ where: { localLevel: localLevel } });
+  } else if (!bloodGroup && !localLevel) {
+    // if only the district parameter is provided, filter by district
+    users = await User.findAll({ where: { district: district } });
+  } else if (!district && !localLevel) {
+    // if only the bloodGroup parameter is provided, filter by bloodGroup
+    users = await User.findAll({ where: { bloodGroup: bloodGroup } });
+  } else if (!bloodGroup) {
+    // if district and localLevel parameters are provided, filter by both
+    users = await User.findAll({
+      where: { district: district, localLevel: localLevel },
+    });
+  } else if (!district) {
+    // if bloodGroup and localLevel parameters are provided, filter by both
+    users = await User.findAll({
+      where: { bloodGroup: bloodGroup, localLevel: localLevel },
+    });
+  } else if (!localLevel) {
+    // if bloodGroup and district parameters are provided, filter by both
+    users = await User.findAll({
+      where: { bloodGroup: bloodGroup, district: district },
+    });
+  } else {
+    // if all parameters are provided, filter by all
+    users = await User.findAll({
+      where: {
+        bloodGroup: bloodGroup,
+        district: district,
+        localLevel: localLevel,
+      },
+    });
+  }
+  res.render("donors/index", { users });
 };
 
 exports.getDonor = async (req, res, next) => {

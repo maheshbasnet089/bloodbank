@@ -4,39 +4,46 @@ const User = db.users;
 const AppError = require("../../utils/appError");
 const sendEmail = require("../../utils/email");
 const PDFDocument = require("pdfkit");
+const fs = require("fs");
 
 const { QueryTypes, DataTypes } = require("sequelize");
 exports.renderBookAppointmentForm = async (req, res) => {
-  res.render("bookAppointment/createForm");
+  const bloodBanks = await sequelize.query(
+    "SELECT id,name,district,localLevel FROM bloodBank ",
+    {
+      type: QueryTypes.SELECT,
+    }
+  );
+
+  res.render("bookAppointment/createForm", { bloodBanks });
 };
 exports.createBookAppointment = async (req, res, next) => {
-  const { email } = req.user;
-  if (!email) {
-    email = req.body.email;
-  }
-  const { name, age, address, phone, bloodGroup, donationDate } = req.body;
-  if (!name || !age || !address || !phone || !bloodGroup || !donationDate) {
-    req.flash("error", "Please provide all fields");
-    return res.redirect("/");
+  const { name, email, address, phone, bloodGroup, bloodBank } = req.body;
+  console.log(req.body);
+  if (!name || !email || !address || !phone || !bloodGroup || !bloodBank) {
+    return res.render("error/pathError", {
+      message: "Please provide all fields",
+      code: 400,
+    });
   }
   await sequelize.query(
-    "CREATE TABLE IF NOT EXISTS bookAppointment (id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,name VARCHAR(255),age VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),bloodGroup VARCHAR(255),donationDate VARCHAR(255),createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)",
+    "CREATE TABLE IF NOT EXISTS bookAppointment (id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,name VARCHAR(255),email VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),bloodGroup VARCHAR(255),bloodBank VARCHAR(255),createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)",
     { type: QueryTypes.CREATE }
   );
   await sequelize.query(
-    "INSERT INTO bookAppointment(name,age,address,phone,bloodGroup,donationDate) VALUES(?,?,?,?,?,?) ",
+    "INSERT INTO bookAppointment(name,email,address,phone,bloodGroup,bloodBank) VALUES(?,?,?,?,?,?) ",
     {
       type: QueryTypes.INSERT,
-      replacements: [name, age, address, phone, bloodGroup, donationDate],
+      replacements: [name, email, address, phone, bloodGroup, bloodBank],
     }
   );
   req.flash("sucess", "Created book appointment sucessfully");
   try {
     const pdf = new PDFDocument();
-    pdf.pipe(fs.createWriteStream("form.pdf"));
+    pdf.pipe(fs.createWriteStream(`form_${name}.pdf`));
     pdf.text("Name: " + name);
     pdf.moveDown();
-    pdf.text("Age: " + age);
+    pdf.text("email: " + email);
     pdf.moveDown();
     pdf.text("Address: " + address);
     pdf.moveDown();
@@ -44,19 +51,35 @@ exports.createBookAppointment = async (req, res, next) => {
     pdf.moveDown();
     pdf.text("bloodGroup:" + bloodGroup);
     pdf.moveDown();
-    pdf.text("Donation Date: " + donationDate);
+    pdf.text("Donation Date: " + bloodBank);
     pdf.moveDown();
     pdf.end();
-    const message = [{ path: "form.pdf" }];
+    const message = [{ filename: "form.pdf", path: `form_${name}.pdf` }];
+    const bloodBankEmail = await sequelize.query(
+      "SELECT email FROM bloodBank WHERE id=?",
+      {
+        type: QueryTypes.SELECT,
+        replacements: [bloodBank],
+      }
+    );
+
     await sendEmail({
       email: email,
-      subject: "You date for book appointment is ",
+      subject: "Form of book appointment ",
       message,
     });
+    await sendEmail({
+      email: bloodBankEmail[0].email,
+      subject: "Form of book appointment ",
+      message,
+    });
+
     res.redirect("/bloodBank");
   } catch (error) {
     console.log(error);
-    req.flash("error", "something went wrong");
-    res.redirect("/");
+    res.render("error/pathError", {
+      message: error,
+      code: 400,
+    });
   }
 };
