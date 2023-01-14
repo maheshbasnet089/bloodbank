@@ -9,6 +9,10 @@ const {
   renderAddToHistory,
   createAddToHistory,
   renderAdminDashboard,
+  renderForgotPassword,
+  forgotPassword,
+  renderResetPassword,
+  resetPassword,
 } = require("../controllers/auth/authController");
 const { renderHomePage } = require("../controllers/home/homeController");
 const catchAsync = require("../utils/catchAsync");
@@ -27,5 +31,15 @@ router
 router
   .route("/admin/dashboard")
   .get(protectMiddleware, restrictTo("admin"), renderAdminDashboard);
+
+router
+  .route("/forgotPassword")
+  .get(renderForgotPassword)
+  .post(catchAsync(forgotPassword));
+
+router
+  .route("/resetPassword")
+  .get(renderResetPassword)
+  .post(catchAsync(resetPassword));
 
 module.exports = router;

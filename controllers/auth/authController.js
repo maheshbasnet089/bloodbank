@@ -8,6 +8,7 @@ const { Op } = require("sequelize");
 const AppError = require("./../../utils/appError");
 const { sequelize } = require("../../model/index");
 const schedule = require("node-schedule");
+const sendTextEmail = require("../../utils/sendTextMessage");
 
 ///SIGN IN JWT TOKEN
 const signInToken = (id) => {
@@ -113,41 +114,6 @@ exports.createUser = async (req, res, next) => {
     availiabilityStatus,
   });
 
-  await sequelize.query(
-    "CREATE TABLE IF NOT EXISTS roleExpiration(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,userId INT REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,expirationDate DATE )",
-    {
-      type: sequelize.QueryTypes.CREATE,
-    }
-  );
-  const expiration_date = new Date();
-  expiration_date.setDate(expiration_date.getDate() + 30);
-  await sequelize.query(
-    " INSERT INTO roleExpiration(userId,expirationDate) VALUES(?,?)",
-    {
-      replacements: [user.id, expiration_date],
-      type: sequelize.QueryTypes.INSERT,
-    }
-  );
-
-  const job = schedule.scheduleJob("0 0 * * * *", async function () {
-    try {
-      const expiredRoleExpirations = await sequelize.query(
-        `SELECT * FROM roleExpiration 
-        WHERE expirationDate < CURRENT_DATE`,
-        { type: sequelize.QueryTypes.SELECT }
-      );
-      for (const expiredRoleExpiration of expiredRoleExpirations) {
-        await sequelize.query(
-          `UPDATE users SET availiabilityStatus = 'Not available' 
-            WHERE id = ${expiredRoleExpiration.userId}`,
-          { type: sequelize.QueryTypes.UPDATE }
-        );
-      }
-      console.log(`${expiredRoleExpirations.length} expired roles updated`);
-    } catch (error) {
-      console.error(error);
-    }
-  });
   if (user) {
     req.flash("success", "User created successfully");
     return res.redirect("/login");
@@ -201,7 +167,7 @@ exports.getMe = async (req, res, next) => {
     `SELECT SUM(amount) FROM history WHERE userId = ${user.id}`,
     { type: sequelize.QueryTypes.SELECT }
   );
-  console.log(history, totalAmount[0]["SUM(amount)"]);
+
   res.status(200).render("auth/profile", {
     user,
     history,
@@ -215,6 +181,12 @@ exports.renderAddToHistory = async (req, res, next) => {
 
 exports.createAddToHistory = async (req, res, next) => {
   const { name, date, amount, caseDetail } = req.body;
+  if (req.user.availiabilityStatus !== "available") {
+    return res.render("error/pathError", {
+      message: "You can only donate once in a 3 months",
+      code: 400,
+    });
+  }
   if (!name || !date || !amount || !caseDetail)
     return res.render("error/pathError", {
       message: "Please provide all the fields",
@@ -234,6 +206,55 @@ exports.createAddToHistory = async (req, res, next) => {
       type: sequelize.QueryTypes.INSERT,
     }
   );
+  const user = await User.findByPk(req.user.id);
+  user.availiabilityStatus = "Not available";
+  await user.save();
+
+  await sequelize.query(
+    "CREATE TABLE IF NOT EXISTS roleExpiration(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,userId INT REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,expirationDate DATE )",
+    {
+      type: sequelize.QueryTypes.CREATE,
+    }
+  );
+  const lastDonation = await sequelize.query(
+    " SELECT date FROM history WHERE userId = ? ORDER BY id DESC LIMIT 1",
+    {
+      replacements: [user.id],
+      type: sequelize.QueryTypes.SELECT,
+    }
+  );
+  const lastDonationDate = lastDonation[0].date;
+  var expiration_date = new Date(lastDonationDate);
+  expiration_date.setDate(expiration_date.getDate() + 30);
+  expiration_date = expiration_date.toISOString().slice(0, 10);
+
+  await sequelize.query(
+    " INSERT INTO roleExpiration(userId,expirationDate) VALUES(?,?)",
+    {
+      replacements: [req.user.id, expiration_date],
+      type: sequelize.QueryTypes.INSERT,
+    }
+  );
+
+  const job = schedule.scheduleJob("0 0 * * * *", async function () {
+    try {
+      const expiredRoleExpirations = await sequelize.query(
+        `SELECT * FROM roleExpiration
+        WHERE expirationDate < CURRENT_DATE`,
+        { type: sequelize.QueryTypes.SELECT }
+      );
+      for (const expiredRoleExpiration of expiredRoleExpirations) {
+        await sequelize.query(
+          `UPDATE users SET availiabilityStatus = 'available'
+            WHERE id = ${expiredRoleExpiration.userId}`,
+          { type: sequelize.QueryTypes.UPDATE }
+        );
+      }
+      console.log(`${expiredRoleExpirations.length} expired roles updated`);
+    } catch (error) {
+      console.error(error);
+    }
+  });
   res.redirect("/profile");
 };
 
@@ -248,4 +269,84 @@ exports.renderAdminDashboard = async (req, res, next) => {
   });
 
   res.render("auth/adminDashboard", { user, users, events, bloodBanks });
+};
+
+exports.renderForgotPassword = async (req, res, next) => {
+  res.render("auth/forgotPassword");
+};
+
+exports.forgotPassword = async (req, res, next) => {
+  //check if user emai exists in the database
+  const { email } = req.body;
+  const user = await User.findOne({ where: { email: email } });
+  if (!user)
+    return res.render("error/pathError", {
+      message: "Email not found",
+      code: 404,
+    });
+
+  // createResetToken method is coming from usermodel file
+  const otp = await user.createResetToken();
+
+  const secret = process.env.SECRET;
+  user.passwordResetToken = createHmac("sha256", secret)
+    .update(`${otp}`)
+    .digest("hex");
+  user.passwordResetTokenExpiresIn = Date.now() + 10 * 60 * 1000;
+
+  await user.save();
+
+  const message = `Forgot your password ? Enter the otp  \n
+  ${otp}. \n If you don't forget your password , please ignore this email! `;
+
+  try {
+    await sendTextEmail({
+      email: user.email,
+      subject: "Your password reset otp (only valids for 10 minutes)",
+      message,
+    });
+    res.redirect("/resetPassword");
+  } catch (err) {
+    user.passwordResetToken = undefined;
+    user.passwordResetTokenExpiresIn = undefined;
+    await user.save();
+
+    return res.render("error/pathError", { message: err.message, code: 500 });
+  }
+};
+exports.renderResetPassword = async (req, res, next) => {
+  res.render("auth/resetPassword");
+};
+
+exports.resetPassword = async (req, res, next) => {
+  const { otp, password } = req.body;
+  if (!otp || !password) {
+    return res.render("error/pathError", { message: "Invalid otp", code: 400 });
+  }
+  const secret = process.env.SECRET;
+
+  const hashedOtp = createHmac("sha256", secret).update(`${otp}`).digest("hex");
+
+  const user = await User.findOne({
+    where: {
+      passwordResetToken: hashedOtp,
+
+      passwordResetTokenExpiresIn: {
+        [Op.gt]: Date.now(),
+      },
+    },
+  });
+  if (!user) {
+    return res.render("error/pathError", {
+      message: "Invalid otp or expired",
+      code: 400,
+    });
+  }
+  user.password = password;
+  user.passwordResetTokenExpiresIn = undefined;
+  user.passwordResetToken = undefined;
+  await user.save();
+
+  // sign in jwt token
+  createToken(user, 200, res, req);
 };
