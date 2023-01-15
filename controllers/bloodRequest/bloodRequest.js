@@ -76,9 +76,13 @@ exports.createBloodRequest = async (req, res, next) => {
   res.redirect("/bloodRequest");
 };
 exports.getBloodRequests = async (req, res, next) => {
-  const bloodRequests = await sequelize.query("SELECT * FROM bloodRequest", {
-    type: QueryTypes.SELECT,
-  });
+  try {
+    var bloodRequests = await sequelize.query("SELECT * FROM bloodRequest", {
+      type: QueryTypes.SELECT,
+    });
+  } catch (error) {
+    bloodRequests = [];
+  }
   // console.log(bloodRequests);
   res.render("bloodRequest/bloodRequest", { bloodRequests });
 };

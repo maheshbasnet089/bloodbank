@@ -8,12 +8,16 @@ const fs = require("fs");
 
 const { QueryTypes, DataTypes } = require("sequelize");
 exports.renderBookAppointmentForm = async (req, res) => {
-  const bloodBanks = await sequelize.query(
-    "SELECT hospitalId,name,district,localLevel FROM bloodBank ",
-    {
-      type: QueryTypes.SELECT,
-    }
-  );
+  try {
+    var bloodBanks = await sequelize.query(
+      "SELECT hospitalId,name,district,localLevel FROM bloodBank ",
+      {
+        type: QueryTypes.SELECT,
+      }
+    );
+  } catch (error) {
+    bloodBanks = [];
+  }
 
   res.render("bookAppointment/createForm", { bloodBanks });
 };
@@ -74,10 +78,14 @@ exports.createBookAppointment = async (req, res, next) => {
       subject: "Form of book appointment ",
       message,
     });
+    res.render("error/pathError", {
+      message: "Booked Appointment sucessfully",
+      code: 200,
+    });
 
-    res.redirect("/bloodBank");
+    // res.redirect("/bloodBank");
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.render("error/pathError", {
       message: error,
       code: 400,

@@ -70,7 +70,34 @@
                 </div>
             </div>
         </div>
-      
+        <p class="color-main h6  mt-4 mb-3 fw-bold d-inline mx-2">Recent contact Messages</p>
+        <% contactMessages.forEach((item)=>{ %>
+            <div class="bloodRequest-card mt-4 p-2 shadow">
+                <div class="bloodRequest-card-body mt-4 p-2 shadow">
+                    <table class="table">
+                        <tbody>
+                          <tr>
+                            <th scope="row">Person Name:</th>
+                            <td><%=item.fullName %></td>
+                        </tr>
+                        <tr>
+                          <th scope="row">Email:</th>
+                          <td><%=item.email %></td>
+                        </tr>
+                          <tr>
+                            <th scope="row">Submitted At:</th>
+                            <td><%=item.createdAt %></td>
+                          </tr>
+                          <tr>
+                            <th scope="row">Message:</th>
+                            <td><%=item.message %></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                </div>
+               
+            </div>
+      <% }) %>
     
     </div>
 </body>

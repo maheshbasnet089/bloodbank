@@ -159,19 +159,29 @@ exports.getMe = async (req, res, next) => {
       code: 400,
     });
   }
-  const history = await sequelize.query(
-    `SELECT * FROM history WHERE userId = ${user.id}`,
-    { type: sequelize.QueryTypes.SELECT }
-  );
-  const totalAmount = await sequelize.query(
-    `SELECT SUM(amount) FROM history WHERE userId = ${user.id}`,
-    { type: sequelize.QueryTypes.SELECT }
-  );
+
+  try {
+    var history = await sequelize.query(
+      `SELECT * FROM history WHERE userId = ${user.id}`,
+      { type: sequelize.QueryTypes.SELECT }
+    );
+  } catch (error) {
+    history = [];
+  }
+  try {
+    var totalAmount = await sequelize.query(
+      `SELECT SUM(amount) FROM history WHERE userId = ${user.id}`,
+      { type: sequelize.QueryTypes.SELECT }
+    );
+  } catch (error) {
+    totalAmount = [];
+    console.log(error);
+  }
 
   res.status(200).render("auth/profile", {
     user,
     history,
-    totalAmount: totalAmount[0]["SUM(amount)"] || 0,
+    totalAmount: (totalAmount.length > 0 && totalAmount[0]["SUM(amount)"]) || 0,
   });
 };
 
@@ -261,19 +271,33 @@ exports.createAddToHistory = async (req, res, next) => {
 exports.renderAdminDashboard = async (req, res, next) => {
   const users = await User.findAll();
   const user = await User.findByPk(req.user.id);
-  const events = await sequelize.query(`SELECT * FROM events`, {
-    type: sequelize.QueryTypes.SELECT,
-  });
   try {
+    var events = await sequelize.query(`SELECT * FROM events`, {
+      type: sequelize.QueryTypes.SELECT,
+    });
     var bloodBanks = await sequelize.query(`SELECT * FROM bloodBank`, {
       type: sequelize.QueryTypes.SELECT,
     });
+    var contactMessages = await sequelize.query(
+      `SELECT * FROM contactMessage`,
+      {
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
   } catch (error) {
+    events = [];
     bloodBanks = [];
+    contactMessages = [];
     // res.render("error/pathError", { message: error.message, code: 400 });
   }
 
-  res.render("auth/adminDashboard", { user, users, events, bloodBanks });
+  res.render("auth/adminDashboard", {
+    user,
+    users,
+    events,
+    bloodBanks,
+    contactMessages,
+  });
 };
 
 exports.renderForgotPassword = async (req, res, next) => {

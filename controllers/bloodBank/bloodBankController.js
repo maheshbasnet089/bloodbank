@@ -108,9 +108,13 @@ exports.getBloodBanks = async (req, res, next) => {
   let bloodBanks;
   if (!province && !district && !localLevel) {
     // if no query parameters are provided, retrieve all users
-    bloodBanks = await sequelize.query(`SELECT * FROM bloodBank`, {
-      type: QueryTypes.SELECT,
-    });
+    try {
+      bloodBanks = await sequelize.query(`SELECT * FROM bloodBank`, {
+        type: QueryTypes.SELECT,
+      });
+    } catch (error) {
+      bloodBanks = [];
+    }
   } else if (!province && !district) {
     // if only the localLevel parameter is provided, filter by localLevel
 

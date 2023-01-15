@@ -14,7 +14,11 @@ const router = express.Router();
 router.route("/new").get(renderBloodRequestForm);
 router
   .route("/")
-  .post(protectMiddleware, restrictTo("donor"), catchAsync(createBloodRequest))
+  .post(
+    protectMiddleware,
+    restrictTo("donor", "admin"),
+    catchAsync(createBloodRequest)
+  )
   .get(catchAsync(getBloodRequests));
 router
   .route("/:id")

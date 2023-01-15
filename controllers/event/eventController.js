@@ -64,10 +64,16 @@ exports.createEvent = async (req, res, next) => {
 };
 
 exports.getEvents = async (req, res, next) => {
-  const events = await sequelize.query(`SELECT * FROM events`, {
-    types: QueryTypes.SELECT,
-  });
-  console.log(events[0]);
+  try {
+    var events = await sequelize.query(`SELECT * FROM events`, {
+      types: QueryTypes.SELECT,
+    });
+  } catch (error) {
+    return res.render("error/pathError", {
+      message: "No any events for now",
+      code: 400,
+    });
+  }
   res.render("events/index", { events: events[0] });
 };
 
