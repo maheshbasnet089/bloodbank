@@ -9,7 +9,7 @@ const fs = require("fs");
 const { QueryTypes, DataTypes } = require("sequelize");
 exports.renderBookAppointmentForm = async (req, res) => {
   const bloodBanks = await sequelize.query(
-    "SELECT id,name,district,localLevel FROM bloodBank ",
+    "SELECT hospitalId,name,district,localLevel FROM bloodBank ",
     {
       type: QueryTypes.SELECT,
     }
@@ -20,6 +20,7 @@ exports.renderBookAppointmentForm = async (req, res) => {
 exports.createBookAppointment = async (req, res, next) => {
   const { name, email, address, phone, bloodGroup, bloodBank } = req.body;
   console.log(req.body);
+
   if (!name || !email || !address || !phone || !bloodGroup || !bloodBank) {
     return res.render("error/pathError", {
       message: "Please provide all fields",
@@ -27,7 +28,7 @@ exports.createBookAppointment = async (req, res, next) => {
     });
   }
   await sequelize.query(
-    "CREATE TABLE IF NOT EXISTS bookAppointment (id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,name VARCHAR(255),email VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),bloodGroup VARCHAR(255),bloodBank VARCHAR(255),createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)",
+    "CREATE TABLE IF NOT EXISTS bookAppointment (id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,name VARCHAR(255) ,email VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),bloodGroup VARCHAR(255),bloodBank VARCHAR(255),createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)",
     { type: QueryTypes.CREATE }
   );
   await sequelize.query(
@@ -56,7 +57,7 @@ exports.createBookAppointment = async (req, res, next) => {
     pdf.end();
     const message = [{ filename: "form.pdf", path: `form_${name}.pdf` }];
     const bloodBankEmail = await sequelize.query(
-      "SELECT email FROM bloodBank WHERE id=?",
+      "SELECT email FROM bloodBank WHERE hospitalId=?",
       {
         type: QueryTypes.SELECT,
         replacements: [bloodBank],

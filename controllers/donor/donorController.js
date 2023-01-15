@@ -117,7 +117,11 @@ exports.getDonors = async (req, res, next) => {
       },
     });
   }
-  res.render("donors/index", { users });
+  const districts = await sequelize.query(" SELECT name FROM districts", {
+    type: QueryTypes.SELECT,
+  });
+  console.log(districts);
+  res.render("donors/index", { users, districts });
 };
 
 exports.getDonor = async (req, res, next) => {

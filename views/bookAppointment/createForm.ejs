@@ -55,7 +55,23 @@
                     <div class="form-field-wrap"><input type="text" required name="phone" placeholder="Phone" class=""></div>
                 </div>
                 <div class="form-row">
-                    <div class="form-field-wrap"><input type="text" required name="bloodGroup" placeholder="bloodGroup" class=""></div>
+                    <div class="form-field-wrap">
+                        <label for="bloodGroup">Select Blood Group</label>
+                        
+                        <select name="bloodGroup" id="bloodGroup" required>
+                            <option value=""></option>
+                            <option value="a+">A+</option>
+                            <option value="ab+">AB+</option>
+                            <option value="o+">O+</option>
+                            <option value="a-">A-</option>
+                            <option value="b+">B+</option>
+                            <option value="ab-">AB-</option>
+                            <option value="b-">B-</option>
+                            <option value="o-">O-</option>
+                            
+                        
+                        </select>
+                    </div>
                 </div>
                 <div class="form-row">
                     
@@ -66,7 +82,7 @@
                                 <option value=""></option>
                                 <% bloodBanks.forEach((bloodBank)=>{ %>
 
-                                    <option value=<%= bloodBank.id %>><%= bloodBank.name %>-<%= bloodBank.district %>,<%= bloodBank.localLevel %></option>
+                                    <option value=<%= bloodBank.hospitalId %>><%= bloodBank.name %>-<%= bloodBank.district %>,<%= bloodBank.localLevel %></option>
                               <%  }) %>
                                 
                             </select>

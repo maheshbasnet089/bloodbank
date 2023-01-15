@@ -56,6 +56,8 @@ app.use(flash());
 app.use((req, res, next) => {
   // console.log(req.cookies.jwtToken);
   res.locals.currentUser = req.cookies.jwtToken;
+  res.locals.hospitalId = req.cookies.hospitalId;
+
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   res.locals.user = req.user;
@@ -98,8 +100,41 @@ app.get("/districtsByName", async (req, res) => {
       type: sequelize.QueryTypes.SELECT,
     }
   );
-  console.log(districtsByName);
+  await sequelize.query(
+    "CREATE TABLE IF NOT EXISTS localLevel(id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,districtId INT REFERENCES districts ON DELETE CASCADE ON UPDATE CASCADE,name VARCHAR(255)) ",
+    {
+      type: sequelize.QueryTypes.CREATE,
+    }
+  );
+  const localLevel = await sequelize.query("SELECT * FROM localLevel", {
+    type: sequelize.QueryTypes.SELECT,
+  });
+
+  if (localLevel.length === 0) {
+    await sequelize.query(
+      "INSERT INTO localLevel(id,districtId,name) VALUES(1,8,'Dharan'),(2,8,'Itahari'),(3,8,'Pachruki')",
+      {
+        type: sequelize.QueryTypes.INSERT,
+      }
+    );
+  }
+
   res.json(districtsByName);
+});
+app.get("/localLevelByName", async (req, res, next) => {
+  try {
+    const localLevels = await sequelize.query(
+      "SELECT localLevel.name FROM localLevel LEFT JOIN districts d ON d.id = localLevel.districtId WHERE d.name=? ",
+      {
+        replacements: [req.query.name],
+        type: sequelize.QueryTypes.SELECT,
+      }
+    );
+
+    res.json(localLevels);
+  } catch (error) {
+    res.render("error/pathError", { message: error.message, code: 500 });
+  }
 });
 //routes
 app.use("/", homeRoute);

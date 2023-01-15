@@ -130,6 +130,12 @@
             </div>
             
             <p class="h2 color-main fw-bold"><%=user.fullName %></p>
+            <% if(history.length<=5){ %>
+              <p class="h6 color-light fw-bold">Bronze</p>
+
+            <% }else{ %>
+              <p class="h5 color-light fw-bold">Silver</p>
+            <% } %>
             <p class="h6 color-light"><%=user.localLevel %>,<%=user.district %>,<%=user.province %></p>
             <div class="available-wrap d-flex gap-4">
                 <% if(user.availiabilityStatus == 'yes' || user.availiabilityStatus == 'available'){ %>

@@ -48,41 +48,45 @@
                 </div>
                 <div class="form-row">
                     <div class="form-field-wrap">
-                        <label for="provience">Select Blood Group</label>
-                        <select name="bloodGroup" required id="provience">
-                            <option value="bagmati">o</option>
-                            <option value="provience 2">negative</option>
-                            <option value="provience 3">Provience -3</option>
-                            <option value="provience 4">Provience -4</option>
+                        <label for="bloodGroup">Select Blood Group</label>
+                       
+                        <select name="bloodGroup" id="bloodGroup" required>
+                            <option value=""></option>
+                            <option value="a+">A+</option>
+                            <option value="ab+">AB+</option>
+                            <option value="o+">O+</option>
+                            <option value="a-">A-</option>
+                            <option value="b+">B+</option>
+                            <option value="ab-">AB-</option>
+                            <option value="b-">B-</option>
+                            <option value="o-">O-</option>
+                            
+                        
                         </select>
                     </div>
                     <div class="form-field-wrap">
-                        <label for="provience">Select Provience</label>
-                        <select name="province" required id="provience">
-                            <option value="Sunsari">Sunsari</option>
-                            <option value="Morang">Morang</option>
-                            <option value="Kathmandu">Kathmandu</option>
-                            <option value="Terhathum">Terhathum</option>
+                        <label for="province">Select Provience</label>
+                        <select name="province" id="province" required onchange="updateDistricts()">
+                            <option value=""></option>
+                            <% provinces.forEach((province)=> { %>
+                                <option value="<%=province.name%>"><%=province.name%></option>
+                                <% }) %>
                         </select>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-field-wrap">
                         <label for="district">Select District</label>
-                        <select name="district" required id="district">
-                            <option value="Sunsari">Sunsari</option>
-                            <option value="Morang">Morang</option>
-                            <option value="Kathmandu">Kathmandu</option>
-                            <option value="Terhathum">Terhathum</option>
+                        <select name="district" id="district" required  onchange="updateLocalLevel()">
+                            <option value=""></option>
+                         
                         </select>
                     </div>
                     <div class="form-field-wrap">
                         <label for="localLevel">Local Level</label>
-                        <select name="localLevel" required id="localLevel">
-                            <option value="level 1">level 1</option>
-                            <option value="level 2">level 2 </option>
-                            <option value="level 3">level 3</option>
-                            <option value="level 4">level 4
+                        <select name="localLevel" id="localLevel">
+                            <option value=""></option>
+                            
                             </option>
                         </select>
                     </div>
@@ -126,6 +130,41 @@
     </div>
     <% } %>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script>
-</script>
+    function updateDistricts() {
+      let name = $('#province').val();
+      if(name){
+        $.get('/districtsByName', {name: name}, (data) => {
+          let options = '';
+          data.forEach((district) => {
+            options += `<option value="${district.name}">${district.name}</option>`;
+          });
+          $('#district').html(options);
+        });
+      }else{
+        $('#district').html('');
+      }
+    }
+    function updateLocalLevel() {
+    let name = $('#district').val();
+    if(name){
+      $.get('/localLevelByName', {name: name}, (data) => {
+        let options = '';
+        options += `<option value=""></option>`;
+        data.forEach((localLevel) => {
+
+          options += `<option value="${localLevel.name}">${localLevel.name}</option>`;
+        });
+        $('#localLevel').html(options);
+      });
+    }else{
+      $('#localLevel').html('');
+    }
+  }
+  </script>
+
 </html>

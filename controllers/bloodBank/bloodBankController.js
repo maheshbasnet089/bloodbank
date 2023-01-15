@@ -11,10 +11,58 @@ exports.renderCreateBloodBank = async (req, res, next) => {
   });
   res.render("bloodbank/createForm", { provinces });
 };
+exports.renderHospitalLogin = async (req, res, next) => {
+  res.render("bloodBank/hospitalLogin");
+};
+
+exports.hospitalLogin = async (req, res, next) => {
+  const { hospitalId } = req.body;
+  const hospital = await sequelize.query(
+    `SELECT * FROM bloodBank WHERE hospitalId = ?`,
+    {
+      type: QueryTypes.SELECT,
+      replacements: [hospitalId],
+    }
+  );
+
+  if (hospital.length === 0)
+    return res.render("error/pathError", {
+      message: "Invalid Hospital Id",
+      code: 400,
+    });
+  const cookieOptions = {
+    expires: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
+    httpOnly: true,
+    secure: true,
+  };
+  res.cookie("hospitalId", hospitalId, cookieOptions);
+  res.redirect(`/bloodBank/dashboard/${hospitalId}`);
+};
+exports.renderHospitalDashboard = async (req, res, next) => {
+  const { id } = req.params;
+  const hospital = await sequelize.query(
+    `SELECT * FROM bloodBank WHERE hospitalId = ?`,
+    {
+      type: QueryTypes.SELECT,
+      replacements: [id],
+    }
+  );
+  const bookAppointment = await sequelize.query(
+    `SELECT * FROM bookAppointment WHERE bloodBank = ?`,
+    {
+      type: QueryTypes.SELECT,
+      replacements: [id],
+    }
+  );
+
+  res.render("bloodBank/dashboard", { hospital: hospital[0], bookAppointment });
+};
 exports.createBloodBank = async (req, res, next) => {
   const { name, address, phone, province, district, localLevel, email } =
     req.body;
 
+  const generateRandomBloodBankId = Math.floor(100000 + Math.random() * 900000);
+  const hospitalId = "HOS_" + generateRandomBloodBankId;
   if (!name || !phone || !province || !district || !localLevel || !email)
     return res.render("error/pathError", {
       message: "Please provide all fields",
@@ -23,16 +71,17 @@ exports.createBloodBank = async (req, res, next) => {
 
   try {
     await sequelize.query(
-      `CREATE TABLE  IF NOT EXISTS bloodBank(id INT NOT NUll AUTO_INCREMENT PRIMARY KEY,name VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255), email VARCHAR(255) ,createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)`,
+      `CREATE TABLE  IF NOT EXISTS bloodBank(id INT NOT NUll AUTO_INCREMENT PRIMARY KEY,hospitalId VARCHAR(255),name VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255), email VARCHAR(255) ,createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)`,
       {
         type: QueryTypes.CREATE,
       }
     );
     await sequelize.query(
-      `INSERT INTO bloodBank (name,address,phone,province,district,localLevel,email) VALUES (?,?,?,?,?,?,?)`,
+      `INSERT INTO bloodBank (hospitalId,name,address,phone,province,district,localLevel,email) VALUES (?,?,?,?,?,?,?,?)`,
       {
         type: QueryTypes.INSERT,
         replacements: [
+          hospitalId,
           name,
           address || null,
           phone,
@@ -116,7 +165,6 @@ exports.getBloodBanks = async (req, res, next) => {
         type: QueryTypes.SELECT,
       }
     );
-    console.log("hello");
   } else {
     // if all parameters are provided, filter by all
 
@@ -131,6 +179,11 @@ exports.getBloodBanks = async (req, res, next) => {
   const provinces = await sequelize.query("SELECT * FROM provinces", {
     type: QueryTypes.SELECT,
   });
+  if (!bloodBanks)
+    return res.render("error/pathError", {
+      message: "No bloodBank found",
+      code: 400,
+    });
 
   res.render("bloodBank/index", { bloodBanks, provinces });
 };

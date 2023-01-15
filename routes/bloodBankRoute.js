@@ -6,6 +6,9 @@ const {
   deleteBloodBank,
   renderCreateBloodBank,
   renderUpdateBloodBankForm,
+  renderHospitalLogin,
+  hospitalLogin,
+  renderHospitalDashboard,
 } = require("../controllers/bloodBank/bloodBankController");
 
 const router = express.Router();
@@ -26,4 +29,9 @@ router
   .patch(restrictTo("admin"), catchAsync(updateBloodBank))
   .delete(restrictTo("admin"), catchAsync(deleteBloodBank));
 
+router
+  .route("/hospitalLogin")
+  .get(renderHospitalLogin)
+  .post(catchAsync(hospitalLogin));
+router.route("/dashboard/:id").get(renderHospitalDashboard);
 module.exports = router;

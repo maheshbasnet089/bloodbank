@@ -6,7 +6,10 @@ const AppError = require("../../utils/appError");
 const { QueryTypes, DataTypes } = require("sequelize");
 
 exports.renderBloodRequestForm = async (req, res, next) => {
-  res.render("bloodRequest/createBloodRequest");
+  const provinces = await sequelize.query(" SELECT * FROM provinces ", {
+    type: sequelize.QueryTypes.SELECT,
+  });
+  res.render("bloodRequest/createBloodRequest", { provinces });
 };
 exports.createBloodRequest = async (req, res, next) => {
   const userId = req.user.id;

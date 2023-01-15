@@ -14,18 +14,22 @@
             <span class="links"><a href="/donor">Find Blood</a></span>
             <span class="links"><a href="Blog.html">Contact</a></span>
 
-            <% if(!currentUser) {%>
+            <% if(!currentUser && !hospitalId) {%>
             <span><a href="login"><button
                         class="nav-btn btn-login btn-radius hover-transition">Login</button></a></span>
             <span><a href="register"><button
                         class="nav-btn btn-register btn-radius hover-transition">Register</button></a></span>
-                        <% } else {%>
-            <span class="links"><a href="/profile">Dashboard</a></span>
+                        <% } else if(hospitalId) {%>
+                <span><a href="/logOut"><button
+                    class="nav-btn btn-login btn-radius hover-transition">Logout</button></a></span>
+                    <% } else {%>
+                        <span class="links"><a href="/profile">Dashboard</a></span>
 
-                            <span><a href="logOut"><button
-                                class="nav-btn btn-login btn-radius hover-transition">Logout</button></a></span>
+                        <span><a href="/logOut"><button
+                            class="nav-btn btn-login btn-radius hover-transition">Logout</button></a></span>
 
-                                <% } %>
+                            <% } %>
+        
 
 
         </nav>

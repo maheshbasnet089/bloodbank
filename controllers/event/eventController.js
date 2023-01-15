@@ -5,7 +5,11 @@ const AppError = require("../../utils/appError");
 
 const { QueryTypes, DataTypes } = require("sequelize");
 exports.renderCreateEventPage = async (req, res, next) => {
-  res.render("events/createForm");
+  const provinces = await sequelize.query(" SELECT * FROM provinces ", {
+    type: sequelize.QueryTypes.SELECT,
+  });
+
+  res.render("events/createForm", { provinces });
 };
 exports.createEvent = async (req, res, next) => {
   const {
@@ -23,21 +27,7 @@ exports.createEvent = async (req, res, next) => {
   const madeBy = "Admin";
   const address = province + "," + district + " ," + localLevel;
   const imagePath = req.file.filename;
-  // console.log(req.file);
-  if (
-    !title ||
-    !madeBy ||
-    !date ||
-    !description ||
-    !address ||
-    !phone ||
-    !province ||
-    !district ||
-    !time ||
-    !streetAddress
-  ) {
-    return res.send("provide all fields");
-  }
+
   try {
     await sequelize.query(
       `CREATE TABLE IF NOT EXISTS events(id INT NOT NUll AUTO_INCREMENT PRIMARY KEY,title VARCHAR(255),description VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255),time DATETIME,streetAddress VARCHAR(255),imagePath VARCHAR(255), createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,date DATE)`,
@@ -50,15 +40,15 @@ exports.createEvent = async (req, res, next) => {
       {
         types: QueryTypes.INSERT,
         replacements: [
-          title,
-          description,
-          address,
+          title || "No title",
+          description || "No description",
+          address || "No address",
           phone,
           date,
 
           province,
           district,
-          localLevel,
+          localLevel || "No local level",
           time,
           streetAddress,
           imagePath,
@@ -68,10 +58,8 @@ exports.createEvent = async (req, res, next) => {
     req.flash("success", "Successfully made a new event!");
     res.redirect("/events");
   } catch (error) {
-    return res.json({
-      status: 400,
-      err: error,
-    });
+    console.log("error", error);
+    res.render("error/pathError", { message: error.message, code: 400 });
   }
 };
 

@@ -64,7 +64,7 @@
                         <div class="form-field-wrap">
                             <label for="district">Select District</label>
     
-                            <select name="district" id="district" required>
+                            <select name="district" id="district" required  onchange="updateLocalLevel()">
                                 <option value=""></option>
                              
                             </select>
@@ -76,10 +76,7 @@
                             <label for="localLevel" required>Local Level</label>
                             <select name="localLevel" id="localLevel">
                                 <option value=""></option>
-                                <option value="level 1">level 1</option>
-                                <option value="level 2">level 2 </option>
-                                <option value="level 3">level 3</option>
-                                <option value="level 4">level 4
+                                
                                 </option>
                             </select>
                         </div>
@@ -163,6 +160,22 @@ crossorigin="anonymous"></script>
         $('#district').html('');
       }
     }
+    function updateLocalLevel() {
+    let name = $('#district').val();
+    if(name){
+      $.get('/localLevelByName', {name: name}, (data) => {
+        let options = '';
+        options += `<option value=""></option>`;
+        data.forEach((localLevel) => {
+
+          options += `<option value="${localLevel.name}">${localLevel.name}</option>`;
+        });
+        $('#localLevel').html(options);
+      });
+    }else{
+      $('#localLevel').html('');
+    }
+  }
   </script>
 
 </html>

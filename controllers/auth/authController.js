@@ -39,7 +39,6 @@ exports.renderRegister = async (req, res) => {
   const provinces = await sequelize.query(" SELECT * FROM provinces ", {
     type: sequelize.QueryTypes.SELECT,
   });
-  console.log(provinces);
 
   res.render("auth/register", { provinces });
 };
@@ -147,6 +146,7 @@ exports.loginUser = async (req, res, next) => {
 
 exports.logOut = async (req, res) => {
   res.clearCookie("jwtToken");
+  res.locals.hospitalId && res.clearCookie("hospitalId");
   req.flash("success", "Logged out successfully");
   res.redirect("/");
 };
@@ -264,9 +264,14 @@ exports.renderAdminDashboard = async (req, res, next) => {
   const events = await sequelize.query(`SELECT * FROM events`, {
     type: sequelize.QueryTypes.SELECT,
   });
-  const bloodBanks = await sequelize.query(`SELECT * FROM bloodBank`, {
-    type: sequelize.QueryTypes.SELECT,
-  });
+  try {
+    var bloodBanks = await sequelize.query(`SELECT * FROM bloodBank`, {
+      type: sequelize.QueryTypes.SELECT,
+    });
+  } catch (error) {
+    bloodBanks = [];
+    // res.render("error/pathError", { message: error.message, code: 400 });
+  }
 
   res.render("auth/adminDashboard", { user, users, events, bloodBanks });
 };
