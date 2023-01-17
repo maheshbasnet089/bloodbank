@@ -41,47 +41,22 @@
             </h1>
             <div class="container">
                 <div class="row">
-                    <div class="col-lg-4 col-12 mb-4 d-flex justify-content-center">
-                        <div class="card text-start">
-                            <img src="assets/images/blood.png" class="card-img-top card-img" alt="...">
-                            <div class="card-body">
-                                <span class="css-card-date fw-bold">19th September 2019 - Admin</span>
-                                <h5 class="card-title color-light fw-bold mt-0">Special title treatment</h5>
-                                <p class="card-text">With supporting text below as a natural lead-in to additional
-                                    content. Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex, asperiores!
-                                </p>
-                                <a href="#" class="btn btn-primary-outline fw-bold text-start p-0">Read More</a>
-                            </div>
-                        </div>
-                    </div>
+                    <% events.forEach((event)=>{ %>
 
-                    <div class="col-lg-4 col-12 mb-4 d-flex justify-content-center">
-                        <div class="card text-start">
-                            <img src="assets/images/blood.png" class="card-img-top card-img" alt="...">
-                            <div class="card-body">
-                                <span class="css-card-date fw-bold">19th September 2019 - Admin</span>
-                                <h5 class="card-title color-light fw-bold mt-0">Special title treatment</h5>
-                                <p class="card-text">With supporting text below as a natural lead-in to additional
-                                    content. Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex, asperiores!
-                                </p>
-                                <a href="#" class="btn btn-primary-outline fw-bold text-start p-0">Read More</a>
+                        <div class="col-lg-4 col-12 mb-4 d-flex justify-content-center">
+                            <div class="card text-start">
+                                <img src="uploads/<%=event.imagePath%>" class="card-img-top card-img" alt="...">
+                                <div class="card-body">
+                                    <span class="css-card-date fw-bold"><%=event.date%>- Admin</span>
+                                    <h5 class="card-title color-light fw-bold mt-0"><%=event.title%>-</h5>
+                                    <p class="card-text"><%=shortenText(event.description,30)%>
+                                    </p>
+                                    <a href="/events/<%=event.id%>" class="btn btn-primary-outline fw-bold text-start p-0">Read More</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                   <% }) %>
 
-                    <div class="col-lg-4 col-12 mb-4 d-flex justify-content-center">
-                        <div class="card text-start">
-                            <img src="assets/images/blood.png" class="card-img-top card-img" alt="...">
-                            <div class="card-body">
-                                <span class="css-card-date fw-bold">19th September 2019 - Admin</span>
-                                <h5 class="card-title color-light fw-bold mt-0">Special title treatment</h5>
-                                <p class="card-text">With supporting text below as a natural lead-in to additional
-                                    content. Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex, asperiores!
-                                </p>
-                                <a href="#" class="btn btn-primary-outline fw-bold text-start p-0">Read More</a>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

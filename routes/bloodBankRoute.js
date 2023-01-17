@@ -9,6 +9,10 @@ const {
   renderHospitalLogin,
   hospitalLogin,
   renderHospitalDashboard,
+  renderAddBloodGroup,
+  addBloodGroup,
+  renderEditBloodGroup,
+  editBloodGroup,
 } = require("../controllers/bloodBank/bloodBankController");
 
 const router = express.Router();
@@ -34,4 +38,13 @@ router
   .get(renderHospitalLogin)
   .post(catchAsync(hospitalLogin));
 router.route("/dashboard/:id").get(renderHospitalDashboard);
+router
+  .route("/dashboard/bloodGroup/add")
+  .get(renderAddBloodGroup)
+  .post(addBloodGroup);
+router
+  .route("/dashboard/bloodGroup/edit")
+  .get(renderEditBloodGroup)
+  .post(editBloodGroup);
+// route.route("/dashboard/bloodGroup/:id").get(renderUpdateBloodGroupForm);
 module.exports = router;

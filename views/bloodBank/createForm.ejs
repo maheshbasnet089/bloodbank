@@ -35,6 +35,7 @@
                 <div class="form-row">
                     <div class="form-field-wrap" ><input type="text" required placeholder="Hospital Name" class="" name="name" ></div>
                 </div>
+                
                 <div class="form-row">
                     <div class="form-field-wrap">
                         <label for="province">Select Province</label>
@@ -46,9 +47,22 @@
                             <% }) %>
                         </select>
                     </div>
+                    <div class="form-field-wrap" style="margin-left: 10px;">
+                        <label for="bloodGroup">Select BloodGroup</label>
+                        <select name="bloodGroup" id="bloodGroup" required >
+                  <option value=""></option>
+
+                           <% bloodGroups.forEach((bloodGroup)=> { %>
+                            <option value="<%=bloodGroup.name%>"><%=bloodGroup.name%></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    
                 </div>
                 <div class="form-row">
                     <div class="form-field-wrap"><input type="text" required placeholder="Phone" class="" name="phone"></div>
+                    <div class="form-field-wrap" style="margin-left: 10px;"><input type="number" required placeholder="Amount" class="" name="amount"></div>
+                    
                 </div>
                 <div class="form-row">
                     <div class="form-field-wrap">
@@ -70,6 +84,7 @@
                         </select>
                     </div>
                 </div>
+                
                 <div class="form-row">
                     <div class="form-field-wrap"><input type="email" required placeholder="email" class="" name="email"></div>
                 </div>

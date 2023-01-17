@@ -3,13 +3,16 @@ const sequelize = db.sequelize;
 const User = db.users;
 const AppError = require("../../utils/appError");
 
-const { QueryTypes, DataTypes } = require("sequelize");
+const { QueryTypes, DataTypes, BLOB } = require("sequelize");
 
 exports.renderCreateBloodBank = async (req, res, next) => {
   const provinces = await sequelize.query(`SELECT * FROM provinces`, {
     type: QueryTypes.SELECT,
   });
-  res.render("bloodbank/createForm", { provinces });
+  const bloodGroups = await sequelize.query(`SELECT * FROM bloodGroup`, {
+    type: QueryTypes.SELECT,
+  });
+  res.render("bloodbank/createForm", { provinces, bloodGroups });
 };
 exports.renderHospitalLogin = async (req, res, next) => {
   res.render("bloodBank/hospitalLogin");
@@ -58,12 +61,30 @@ exports.renderHospitalDashboard = async (req, res, next) => {
   res.render("bloodBank/dashboard", { hospital: hospital[0], bookAppointment });
 };
 exports.createBloodBank = async (req, res, next) => {
-  const { name, address, phone, province, district, localLevel, email } =
-    req.body;
+  const {
+    name,
+    address,
+    phone,
+    province,
+    district,
+    localLevel,
+    email,
+    bloodGroup,
+    amount,
+  } = req.body;
 
   const generateRandomBloodBankId = Math.floor(100000 + Math.random() * 900000);
   const hospitalId = "HOS_" + generateRandomBloodBankId;
-  if (!name || !phone || !province || !district || !localLevel || !email)
+  if (
+    !name ||
+    !phone ||
+    !province ||
+    !district ||
+    !localLevel ||
+    !email ||
+    !bloodGroup ||
+    !amount
+  )
     return res.render("error/pathError", {
       message: "Please provide all fields",
       code: 400,
@@ -72,6 +93,13 @@ exports.createBloodBank = async (req, res, next) => {
   try {
     await sequelize.query(
       `CREATE TABLE  IF NOT EXISTS bloodBank(id INT NOT NUll AUTO_INCREMENT PRIMARY KEY,hospitalId VARCHAR(255),name VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255), email VARCHAR(255) ,createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)`,
+      {
+        type: QueryTypes.CREATE,
+      }
+    );
+    await sequelize.query(
+      `CREATE TABLE IF NOT EXISTS bloodGroup_${hospitalId}  (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,bloodGroup VARCHAR(255),amount INT,hospitalId VARCHAR(255) NULL
+      )`,
       {
         type: QueryTypes.CREATE,
       }
@@ -90,6 +118,13 @@ exports.createBloodBank = async (req, res, next) => {
           localLevel,
           email,
         ],
+      }
+    );
+    await sequelize.query(
+      `INSERT INTO bloodGroup_${hospitalId} (bloodGroup,amount,hospitalId) VALUES (?,?,?)`,
+      {
+        type: QueryTypes.INSERT,
+        replacements: [bloodGroup, amount, hospitalId],
       }
     );
     req.flash("success", "Successfully made a new bloodBank!");
@@ -245,4 +280,58 @@ exports.deleteBloodBank = async (req, res, next) => {
   req.flash("success", "Successfully deleted bloodBank!");
 
   res.redirect("/bloodBank");
+};
+
+exports.renderAddBloodGroup = async (req, res, next) => {
+  const bloodGroups = await sequelize.query("SELECT * FROM bloodGroup", {
+    type: QueryTypes.SELECT,
+  });
+
+  res.render("bloodBank/createBloodGroup", { bloodGroups });
+};
+
+exports.addBloodGroup = async (req, res, next) => {
+  try {
+    const { bloodGroup, amount } = req.body;
+    const hospitalId = req.cookies.hospitalId;
+    await sequelize.query(
+      `INSERT INTO bloodGroup_${hospitalId} (bloodGroup,amount,hospitalId) VALUES(?,?,?) `,
+      {
+        type: QueryTypes.INSERT,
+        replacements: [bloodGroup, amount, hospitalId],
+      }
+    );
+    res.redirect(`/bloodBank/dashboard/${hospitalId}`);
+  } catch (error) {
+    res.render("error/pathError", { message: error, code: 500 });
+  }
+};
+
+exports.renderEditBloodGroup = async (req, res, next) => {
+  const bloodGroups = await sequelize.query(
+    `SELECT * FROM bloodGroup_${req.cookies.hospitalId} `,
+    {
+      type: QueryTypes.SELECT,
+    }
+  );
+  console.log(bloodGroups);
+  res.render("bloodBank/editBloodGroup", { bloodGroups });
+};
+
+exports.editBloodGroup = async (req, res, next) => {
+  try {
+    const { bloodGroup, amount } = req.body;
+    const hospitalId = req.cookies.hospitalId;
+    await sequelize.query(
+      `UPDATE bloodGroup_${hospitalId} SET amount=? WHERE bloodGroup = ?`,
+      {
+        type: QueryTypes.UPDATE,
+        replacements: [amount, bloodGroup],
+      }
+    );
+    res.redirect(`/bloodBank/dashboard/${hospitalId}`);
+  } catch (error) {
+    console.log(error);
+    res.render("error/pathError", { message: error, code: 500 });
+  }
 };
