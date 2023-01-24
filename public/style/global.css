@@ -120,6 +120,10 @@ color:var(--white);
 .color-text{
     color: var(--textColor);
 }
+input:focus{
+    outline: none;
+    border : 1px solid #E03455;
+}
 
 /* global classes end */
 

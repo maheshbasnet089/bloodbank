@@ -69,6 +69,7 @@ exports.getEvents = async (req, res, next) => {
       types: QueryTypes.SELECT,
     });
   } catch (error) {
+    events = [];
     return res.render("error/pathError", {
       message: "No any events for now",
       code: 400,
@@ -78,12 +79,16 @@ exports.getEvents = async (req, res, next) => {
 };
 
 exports.getIndividualEvent = async (req, res, next) => {
-  const event = await sequelize.query(`SELECT * FROM events WHERE id=?`, {
-    types: QueryTypes.SELECT,
-    replacements: [req.params.id],
-  });
+  try {
+    var event = await sequelize.query(`SELECT * FROM events WHERE id=?`, {
+      types: QueryTypes.SELECT,
+      replacements: [req.params.id],
+    });
+  } catch (error) {
+    event = [];
+  }
   if (!event) {
-    req.flash("error", "Cannot find that campground!");
+    req.flash("error", "Cannot find that event!");
     return res.redirect("/events");
   }
 

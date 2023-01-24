@@ -82,7 +82,11 @@ exports.getDonors = async (req, res, next) => {
   let users;
   if (!bloodGroup && !district && !localLevel) {
     // if no query parameters are provided, retrieve all users
-    users = await User.findAll();
+    try {
+      users = await User.findAll();
+    } catch (error) {
+      users = [];
+    }
   } else if (!bloodGroup && !district) {
     // if only the localLevel parameter is provided, filter by localLevel
     users = await User.findAll({ where: { localLevel: localLevel } });

@@ -23,7 +23,6 @@ exports.renderBookAppointmentForm = async (req, res) => {
 };
 exports.createBookAppointment = async (req, res, next) => {
   const { name, email, address, phone, bloodGroup, bloodBank } = req.body;
-  console.log(req.body);
 
   if (!name || !email || !address || !phone || !bloodGroup || !bloodBank) {
     return res.render("error/pathError", {

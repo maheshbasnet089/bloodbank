@@ -92,7 +92,7 @@ exports.createBloodBank = async (req, res, next) => {
 
   try {
     await sequelize.query(
-      `CREATE TABLE  IF NOT EXISTS bloodBank(id INT NOT NUll AUTO_INCREMENT PRIMARY KEY,hospitalId VARCHAR(255),name VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255), email VARCHAR(255) ,createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)`,
+      `CREATE TABLE  IF NOT EXISTS bloodBank(id INT NOT NUll AUTO_INCREMENT PRIMARY KEY,hospitalId VARCHAR(255),name VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255), email VARCHAR(255),bloodGroup VARCHAR(255) NULL,amount INT NULL ,createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)`,
       {
         type: QueryTypes.CREATE,
       }
@@ -105,7 +105,7 @@ exports.createBloodBank = async (req, res, next) => {
       }
     );
     await sequelize.query(
-      `INSERT INTO bloodBank (hospitalId,name,address,phone,province,district,localLevel,email) VALUES (?,?,?,?,?,?,?,?)`,
+      `INSERT INTO bloodBank (hospitalId,name,address,phone,province,district,localLevel,email,bloodGroup,amount) VALUES (?,?,?,?,?,?,?,?,?,?)`,
       {
         type: QueryTypes.INSERT,
         replacements: [
@@ -117,6 +117,8 @@ exports.createBloodBank = async (req, res, next) => {
           district,
           localLevel,
           email,
+          bloodGroup,
+          amount,
         ],
       }
     );
@@ -214,10 +216,13 @@ exports.getBloodBanks = async (req, res, next) => {
       }
     );
   }
-
-  const provinces = await sequelize.query("SELECT * FROM provinces", {
-    type: QueryTypes.SELECT,
-  });
+  try {
+    var provinces = await sequelize.query("SELECT * FROM provinces", {
+      type: QueryTypes.SELECT,
+    });
+  } catch (error) {
+    provinces = [];
+  }
   if (!bloodBanks)
     return res.render("error/pathError", {
       message: "No bloodBank found",
@@ -327,6 +332,13 @@ exports.editBloodGroup = async (req, res, next) => {
       {
         type: QueryTypes.UPDATE,
         replacements: [amount, bloodGroup],
+      }
+    );
+    await sequelize.query(
+      `UPDATE bloodBank SET amount=? WHERE bloodGroup = ? AND hospitalId=?`,
+      {
+        type: QueryTypes.UPDATE,
+        replacements: [amount, bloodGroup, hospitalId],
       }
     );
     res.redirect(`/bloodBank/dashboard/${hospitalId}`);
