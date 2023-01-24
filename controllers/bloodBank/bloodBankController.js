@@ -4,6 +4,8 @@ const User = db.users;
 const AppError = require("../../utils/appError");
 
 const { QueryTypes, DataTypes, BLOB } = require("sequelize");
+const sendEmail = require("../../utils/email");
+const sendTextEmail = require("../../utils/sendTextMessage");
 
 exports.renderCreateBloodBank = async (req, res, next) => {
   const provinces = await sequelize.query(`SELECT * FROM provinces`, {
@@ -19,18 +21,18 @@ exports.renderHospitalLogin = async (req, res, next) => {
 };
 
 exports.hospitalLogin = async (req, res, next) => {
-  const { hospitalId } = req.body;
+  const { hospitalId, hospitalPassword } = req.body;
   const hospital = await sequelize.query(
-    `SELECT * FROM bloodBank WHERE hospitalId = ?`,
+    `SELECT * FROM bloodBank WHERE hospitalId = ? AND hospitalPassword = ?`,
     {
       type: QueryTypes.SELECT,
-      replacements: [hospitalId],
+      replacements: [hospitalId, hospitalPassword],
     }
   );
 
   if (hospital.length === 0)
     return res.render("error/pathError", {
-      message: "Invalid Hospital Id",
+      message: "Invalid Hospital Id or password",
       code: 400,
     });
   const cookieOptions = {
@@ -75,16 +77,12 @@ exports.createBloodBank = async (req, res, next) => {
 
   const generateRandomBloodBankId = Math.floor(100000 + Math.random() * 900000);
   const hospitalId = "HOS_" + generateRandomBloodBankId;
-  if (
-    !name ||
-    !phone ||
-    !province ||
-    !district ||
-    !localLevel ||
-    !email ||
-    !bloodGroup ||
-    !amount
-  )
+  const generateRandomBloodBankPassword = Math.floor(
+    100000 + Math.random() * 900000
+  );
+
+  const hospitalPassword = "PASS_" + generateRandomBloodBankPassword;
+  if (!name || !phone || !province || !district || !localLevel || !email)
     return res.render("error/pathError", {
       message: "Please provide all fields",
       code: 400,
@@ -92,20 +90,20 @@ exports.createBloodBank = async (req, res, next) => {
 
   try {
     await sequelize.query(
-      `CREATE TABLE  IF NOT EXISTS bloodBank(id INT NOT NUll AUTO_INCREMENT PRIMARY KEY,hospitalId VARCHAR(255),name VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255), email VARCHAR(255),bloodGroup VARCHAR(255) NULL,amount INT NULL ,createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)`,
+      `CREATE TABLE  IF NOT EXISTS bloodBank(id INT NOT NUll AUTO_INCREMENT PRIMARY KEY,hospitalId VARCHAR(255) REFERENCES bloodGroups ON DELETE CASCADE ON UPDATE CASCADE ,name VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255), email VARCHAR(255),bloodGroup VARCHAR(255) NULL,amount INT NULL ,hospitalPassword VARCHAR(255),createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)`,
       {
         type: QueryTypes.CREATE,
       }
     );
     await sequelize.query(
-      `CREATE TABLE IF NOT EXISTS bloodGroup_${hospitalId}  (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,bloodGroup VARCHAR(255),amount INT,hospitalId VARCHAR(255) NULL
+      `CREATE TABLE IF NOT EXISTS bloodGroups  (id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,bloodGroup VARCHAR(255),amount INT,hospitalId VARCHAR(255) NULL
       )`,
       {
         type: QueryTypes.CREATE,
       }
     );
     await sequelize.query(
-      `INSERT INTO bloodBank (hospitalId,name,address,phone,province,district,localLevel,email,bloodGroup,amount) VALUES (?,?,?,?,?,?,?,?,?,?)`,
+      `INSERT INTO bloodBank (hospitalId,name,address,phone,province,district,localLevel,email,bloodGroup,amount,hospitalPassword) VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
       {
         type: QueryTypes.INSERT,
         replacements: [
@@ -117,19 +115,27 @@ exports.createBloodBank = async (req, res, next) => {
           district,
           localLevel,
           email,
-          bloodGroup,
-          amount,
+          bloodGroup || null,
+          amount || null,
+          hospitalPassword,
         ],
       }
     );
+
     await sequelize.query(
-      `INSERT INTO bloodGroup_${hospitalId} (bloodGroup,amount,hospitalId) VALUES (?,?,?)`,
+      `INSERT INTO bloodGroups (bloodGroup,amount,hospitalId) VALUES ( ' A+ ',0,'${hospitalId}' ),( ' A- ',0,'${hospitalId}' ),( ' B+ ',0,'${hospitalId}' ),( ' B- ',0,'${hospitalId}' ),( ' AB+ ',0,'${hospitalId}' ),( ' AB- ',0,'${hospitalId}' ),( ' O+ ',0,'${hospitalId}' ),( ' O- ',0,'${hospitalId}' )`,
       {
         type: QueryTypes.INSERT,
-        replacements: [bloodGroup, amount, hospitalId],
       }
     );
     req.flash("success", "Successfully made a new bloodBank!");
+    const message = `Your hospital id is ${hospitalId} and password is ${hospitalPassword}`;
+
+    await sendTextEmail({
+      email: email,
+      subject: "Your hosptal Login Credentials",
+      message,
+    });
 
     res.redirect("/bloodBank");
   } catch (error) {
@@ -146,8 +152,21 @@ exports.getBloodBanks = async (req, res, next) => {
   if (!province && !district && !localLevel) {
     // if no query parameters are provided, retrieve all users
     try {
-      bloodBanks = await sequelize.query(`SELECT * FROM bloodBank`, {
+      // bloodBanks = await sequelize.query(`SELECT * FROM bloodBank  `, {
+      //   type: QueryTypes.SELECT,
+      // });
+      bloodBanks = await sequelize.query("SELECT * FROM bloodBank", {
         type: QueryTypes.SELECT,
+      });
+      const bloodGroups = await sequelize.query(`SELECT * FROM bloodGroups`, {
+        type: QueryTypes.SELECT,
+      });
+      bloodBanks = bloodBanks.map((bloodBank) => {
+        const bloodGroup = bloodGroups.filter(
+          (bloodGroup) => bloodGroup.hospitalId === bloodBank.hospitalId
+        );
+        bloodBank.bloodGroup = bloodGroup;
+        return bloodBank;
       });
     } catch (error) {
       bloodBanks = [];
@@ -161,6 +180,16 @@ exports.getBloodBanks = async (req, res, next) => {
         type: QueryTypes.SELECT,
       }
     );
+    const bloodGroups = await sequelize.query(`SELECT * FROM bloodGroups`, {
+      type: QueryTypes.SELECT,
+    });
+    bloodBanks = bloodBanks.map((bloodBank) => {
+      const bloodGroup = bloodGroups.filter(
+        (bloodGroup) => bloodGroup.hospitalId === bloodBank.hospitalId
+      );
+      bloodBank.bloodGroup = bloodGroup;
+      return bloodBank;
+    });
   } else if (!province && !localLevel) {
     // if only the district parameter is provided, filter by district
 
@@ -170,6 +199,16 @@ exports.getBloodBanks = async (req, res, next) => {
         type: QueryTypes.SELECT,
       }
     );
+    const bloodGroups = await sequelize.query(`SELECT * FROM bloodGroups`, {
+      type: QueryTypes.SELECT,
+    });
+    bloodBanks = bloodBanks.map((bloodBank) => {
+      const bloodGroup = bloodGroups.filter(
+        (bloodGroup) => bloodGroup.hospitalId === bloodBank.hospitalId
+      );
+      bloodBank.bloodGroup = bloodGroup;
+      return bloodBank;
+    });
   } else if (!district && !localLevel) {
     // if only the province parameter is provided, filter by province
 
@@ -179,6 +218,16 @@ exports.getBloodBanks = async (req, res, next) => {
         type: QueryTypes.SELECT,
       }
     );
+    const bloodGroups = await sequelize.query(`SELECT * FROM bloodGroups`, {
+      type: QueryTypes.SELECT,
+    });
+    bloodBanks = bloodBanks.map((bloodBank) => {
+      const bloodGroup = bloodGroups.filter(
+        (bloodGroup) => bloodGroup.hospitalId === bloodBank.hospitalId
+      );
+      bloodBank.bloodGroup = bloodGroup;
+      return bloodBank;
+    });
   } else if (!province) {
     // if district and localLevel parameters are provided, filter by both
 
@@ -188,6 +237,16 @@ exports.getBloodBanks = async (req, res, next) => {
         type: QueryTypes.SELECT,
       }
     );
+    const bloodGroups = await sequelize.query(`SELECT * FROM bloodGroups`, {
+      type: QueryTypes.SELECT,
+    });
+    bloodBanks = bloodBanks.map((bloodBank) => {
+      const bloodGroup = bloodGroups.filter(
+        (bloodGroup) => bloodGroup.hospitalId === bloodBank.hospitalId
+      );
+      bloodBank.bloodGroup = bloodGroup;
+      return bloodBank;
+    });
   } else if (!district) {
     // if province and localLevel parameters are provided, filter by both
 
@@ -197,6 +256,16 @@ exports.getBloodBanks = async (req, res, next) => {
         type: QueryTypes.SELECT,
       }
     );
+    const bloodGroups = await sequelize.query(`SELECT * FROM bloodGroups`, {
+      type: QueryTypes.SELECT,
+    });
+    bloodBanks = bloodBanks.map((bloodBank) => {
+      const bloodGroup = bloodGroups.filter(
+        (bloodGroup) => bloodGroup.hospitalId === bloodBank.hospitalId
+      );
+      bloodBank.bloodGroup = bloodGroup;
+      return bloodBank;
+    });
   } else if (!localLevel) {
     // if province and district parameters are provided, filter by both
 
@@ -206,15 +275,35 @@ exports.getBloodBanks = async (req, res, next) => {
         type: QueryTypes.SELECT,
       }
     );
+    const bloodGroups = await sequelize.query(`SELECT * FROM bloodGroups`, {
+      type: QueryTypes.SELECT,
+    });
+    bloodBanks = bloodBanks.map((bloodBank) => {
+      const bloodGroup = bloodGroups.filter(
+        (bloodGroup) => bloodGroup.hospitalId === bloodBank.hospitalId
+      );
+      bloodBank.bloodGroup = bloodGroup;
+      return bloodBank;
+    });
   } else {
     // if all parameters are provided, filter by all
 
     bloodBanks = await sequelize.query(
-      `SELECT * FROM bloodBank WHERE localLevel='${localLevel}' AND district='${district}' AND province='${province}' `,
+      `SELECT * FROM bloodBank WHERE localLevel='${localLevel}' AND district='${district}' AND province='${province}'  `,
       {
         type: QueryTypes.SELECT,
       }
     );
+    const bloodGroups = await sequelize.query(`SELECT * FROM bloodGroups`, {
+      type: QueryTypes.SELECT,
+    });
+    bloodBanks = bloodBanks.map((bloodBank) => {
+      const bloodGroup = bloodGroups.filter(
+        (bloodGroup) => bloodGroup.hospitalId === bloodBank.hospitalId
+      );
+      bloodBank.bloodGroup = bloodGroup;
+      return bloodBank;
+    });
   }
   try {
     var provinces = await sequelize.query("SELECT * FROM provinces", {
@@ -249,6 +338,8 @@ exports.getBloodBank = async (req, res, next) => {
 };
 
 exports.renderUpdateBloodBankForm = async (req, res, next) => {
+  const hospitalId = req.cookies.hospitalId;
+  console.log("hospitalId", hospitalId);
   const bloodBank = await sequelize.query(
     `SELECT * FROM bloodBank WHERE id = ?`,
     {
@@ -299,6 +390,7 @@ exports.addBloodGroup = async (req, res, next) => {
   try {
     const { bloodGroup, amount } = req.body;
     const hospitalId = req.cookies.hospitalId;
+
     await sequelize.query(
       `INSERT INTO bloodGroup_${hospitalId} (bloodGroup,amount,hospitalId) VALUES(?,?,?) `,
       {
@@ -314,9 +406,10 @@ exports.addBloodGroup = async (req, res, next) => {
 
 exports.renderEditBloodGroup = async (req, res, next) => {
   const bloodGroups = await sequelize.query(
-    `SELECT * FROM bloodGroup_${req.cookies.hospitalId} `,
+    `SELECT * FROM bloodGroups WHERE hospitalId=? `,
     {
       type: QueryTypes.SELECT,
+      replacements: [req.cookies.hospitalId],
     }
   );
   console.log(bloodGroups);
@@ -328,19 +421,13 @@ exports.editBloodGroup = async (req, res, next) => {
     const { bloodGroup, amount } = req.body;
     const hospitalId = req.cookies.hospitalId;
     await sequelize.query(
-      `UPDATE bloodGroup_${hospitalId} SET amount=? WHERE bloodGroup = ?`,
-      {
-        type: QueryTypes.UPDATE,
-        replacements: [amount, bloodGroup],
-      }
-    );
-    await sequelize.query(
-      `UPDATE bloodBank SET amount=? WHERE bloodGroup = ? AND hospitalId=?`,
+      `UPDATE bloodGroups SET amount=? WHERE bloodGroup = ? AND hospitalId=?`,
       {
         type: QueryTypes.UPDATE,
         replacements: [amount, bloodGroup, hospitalId],
       }
     );
+
     res.redirect(`/bloodBank/dashboard/${hospitalId}`);
   } catch (error) {
     console.log(error);

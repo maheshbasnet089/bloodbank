@@ -20,7 +20,10 @@
         <div class="form-card">
             <form action="/bloodBank/hospitalLogin" method="post">
                 <div class="form-row">
-                    <div class="form-field-wrap"><input type="text" name="hospitalId" placeholder="Enter hospital ID" class=""></div>
+                    <div class="form-field-wrap"><input type="text" required name="hospitalId" placeholder="Enter hospital ID" class=""></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-field-wrap"><input type="password" required name="hospitalPassword" placeholder="Enter hospital Password" class=""></div>
                 </div>
              
                 <div class="form-row">
@@ -28,10 +31,6 @@
                         <button type="submit" class="btn-primary">Login</button>
                     </div>
                 </div>
-                
-                <div class="form-row">
-                    <p class="color-gray">Not register yet? <span><a href="/register" class="color-light">Create an account</a></span></p>
-                   </div>
             </form>
         </div>
     </div>

@@ -48,9 +48,7 @@
                 <div class="form-row">
                     <div class="form-field-wrap"><input type="email" required name="email" placeholder="email" class=""></div>
                 </div>
-                <div class="form-row">
-                    <div class="form-field-wrap"><input type="text" required name="address" placeholder="Address" class=""></div>
-                </div>
+        
                 <div class="form-row">
                     <div class="form-field-wrap"><input type="text" required name="phone" placeholder="Phone" class=""></div>
                 </div>
@@ -73,6 +71,37 @@
                         </select>
                     </div>
                 </div>
+             
+                <div class="form-row">
+                    <div class="form-field-wrap">
+                        <label for="province">Select Province</label>
+                        <select name="province" id="province" required onchange="updateDistricts()">
+                            <option value=""></option>
+                            <% provinces.forEach((province)=> { %>
+                                <option value="<%=province.name%>"><%=province.name%></option>
+                                <% }) %>
+                        </select>
+                    </div>
+                    <div class="form-field-wrap">
+                        <label for="district">Select District</label>
+
+                        <select name="district" id="district" required  onchange="updateLocalLevel()">
+                            <option value=""></option>
+                         
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-field-wrap">
+                        <label for="localLevel" required>Local Level</label>
+                        <select name="localLevel" id="localLevel">
+                            <option value=""></option>
+                            
+                            </option>
+                        </select>
+                    </div>
+                </div>
                 <div class="form-row">
                     
                     <div class="form-field-wrap">
@@ -82,13 +111,14 @@
                                 <option value=""></option>
                                 <% bloodBanks.forEach((bloodBank)=>{ %>
 
-                                    <option value=<%= bloodBank.hospitalId %>><%= bloodBank.name %>-<%= bloodBank.district %>,<%= bloodBank.localLevel %></option>
+                                    <option value=<%= bloodBank.hospitalId %>><%= bloodBank.name %></option>
                               <%  }) %>
                                 
                             </select>
                     </div>
-                   
                 </div>
+
+                
                 <div class="form-row">
                     <div class="form-field-wrap">
                         <button type="submit" class="btn-primary">Book Appointment</button>
@@ -100,5 +130,43 @@
             </form>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        function updateDistricts() {
+          let name = $('#province').val();
+          console.log(name)
+          if(name){
+            $.get('/districtsByName', {name: name}, (data) => {
+              let options = '';
+              data.forEach((district) => {
+                options += `<option value="${district.name}">${district.name}</option>`;
+              });
+              $('#district').html(options);
+            });
+          }else{
+            $('#district').html('');
+          }
+        }
+        function updateLocalLevel() {
+        let name = $('#district').val();
+        if(name){
+          $.get('/localLevelByName', {name: name}, (data) => {
+            let options = '';
+            options += `<option value=""></option>`;
+            data.forEach((localLevel) => {
+    
+              options += `<option value="${localLevel.name}">${localLevel.name}</option>`;
+            });
+            $('#localLevel').html(options);
+          });
+        }else{
+          $('#localLevel').html('');
+        }
+      }
+      </script>
 </body>
+
 </html>

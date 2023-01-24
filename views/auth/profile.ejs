@@ -39,7 +39,7 @@
         <div class="blood-add-button-wrap w-100 d-flex justify-content-end position-fixed top-0 end-0 mt-4 mx-5" style="padding-top: 90px;">
             <span style="margin-right: 20px;"><a href="/admin/dashboard" class="btn-primary rounded">Go To Admin DashBoard</a></span>
             
-            <span><a href="/bookAppointment/new" class="btn-primary rounded"><i class="fa-solid fa-plus"></i> Add Appointment</a></span>
+            
         </div>
         
         <p class="h2 color-main fw-bold"><%=user.fullName %></p>
@@ -99,6 +99,7 @@
         </div>
         <p class="color-main h6  mt-4 mb-3 fw-bold d-inline mx-2">Recent History</p>
         <span><a href="/addToHistory" class="btn-primary sm rounded mt-5">Add new</a></span>
+        <span><a href="/bookAppointment/new" class="btn-primary rounded m-3"><i class="fa-solid fa-plus"></i> Add Appointment</a></span>
         <% history.forEach((item)=>{ %>
             <div class="bloodRequest-card mt-4 p-2 shadow">
                 <div class="bloodRequest-card-body mt-4 p-2 shadow">

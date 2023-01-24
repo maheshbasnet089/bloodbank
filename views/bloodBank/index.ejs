@@ -46,7 +46,7 @@
         <div class="bloodBank-search-wrap">
             
         <form class="row g-3" action="/bloodBank" method="get">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label for="province" class="form-label">Province</label>
                 <select id="province" name="province" class="form-select"  onchange="updateDistricts()">
                   <option value=""></option>
@@ -62,7 +62,7 @@
                
               </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-4">
               <label for="localLevel" class="form-label">Local Level</label>
               <select id="localLevel" name="localLevel" class="form-select"  >
                 
@@ -88,8 +88,26 @@
                               <p class="d-block w-100"> <span class="fw-bold"> Address: </span><%=bloodBank.province%>,<%=bloodBank.district%>,<%=bloodBank.localLevel%></</p>
                               <p class="d-block w-100"> <span class="fw-bold"> Contact: </span><%=bloodBank.phone%></</p>
                               <p class="d-block w-100"> <span class="fw-bold"> Email: </span><%=bloodBank.email%></</p>
-                              <p class="d-block w-100"> <span class="fw-bold"> BloodGroup: </span><%=bloodBank.bloodGroup%></</p>
-                              <p class="d-block w-100"> <span class="fw-bold"> Amount: </span><%=bloodBank.amount%></</p>
+                              <table class="table">
+                                <thead>
+                                  <tr>
+                                    <th scope="col">id</th>
+                                    <th scope="col">BloodGroup</th>
+                                    <th scope="col">Amount</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <% bloodBank.bloodGroup.forEach((bg,i) => { %>
+                                  <tr>
+                                    <th scope="row"> <%=i+1 %> </th>
+                                    <td><%=bg.bloodGroup%></td>
+                                    <td><%=bg.amount%></td>
+                                
+                                  </tr>
+                                  <% }) %>
+                                </tbody>
+                              </table>
+
 
                            
                           </div>

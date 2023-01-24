@@ -15,30 +15,51 @@ exports.renderBookAppointmentForm = async (req, res) => {
         type: QueryTypes.SELECT,
       }
     );
+    var provinces = await sequelize.query("SELECT * FROM provinces", {
+      type: QueryTypes.SELECT,
+    });
   } catch (error) {
     bloodBanks = [];
+    provinces = [];
   }
 
-  res.render("bookAppointment/createForm", { bloodBanks });
+  res.render("bookAppointment/createForm", { bloodBanks, provinces });
 };
 exports.createBookAppointment = async (req, res, next) => {
-  const { name, email, address, phone, bloodGroup, bloodBank } = req.body;
+  const {
+    name,
+    email,
+    province,
+    district,
+    localLevel,
+    phone,
+    bloodGroup,
+    bloodBank,
+  } = req.body;
+  const address = province + district + localLevel;
 
-  if (!name || !email || !address || !phone || !bloodGroup || !bloodBank) {
+  if (!name || !email || !address || !phone || !bloodGroup) {
     return res.render("error/pathError", {
       message: "Please provide all fields",
       code: 400,
     });
   }
   await sequelize.query(
-    "CREATE TABLE IF NOT EXISTS bookAppointment (id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,name VARCHAR(255) ,email VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),bloodGroup VARCHAR(255),bloodBank VARCHAR(255),createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)",
+    "CREATE TABLE IF NOT EXISTS bookAppointment (id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,name VARCHAR(255) ,email VARCHAR(255),address VARCHAR(255),phone VARCHAR(255),bloodGroup VARCHAR(255),bloodBank VARCHAR(255) NULL,createdAt DATETIME DEFAULT CURRENT_TIMESTAMP)",
     { type: QueryTypes.CREATE }
   );
   await sequelize.query(
     "INSERT INTO bookAppointment(name,email,address,phone,bloodGroup,bloodBank) VALUES(?,?,?,?,?,?) ",
     {
       type: QueryTypes.INSERT,
-      replacements: [name, email, address, phone, bloodGroup, bloodBank],
+      replacements: [
+        name,
+        email,
+        address,
+        phone,
+        bloodGroup,
+        bloodBank || null,
+      ],
     }
   );
   req.flash("sucess", "Created book appointment sucessfully");
@@ -55,7 +76,7 @@ exports.createBookAppointment = async (req, res, next) => {
     pdf.moveDown();
     pdf.text("bloodGroup:" + bloodGroup);
     pdf.moveDown();
-    pdf.text("Donation Date: " + bloodBank);
+    pdf.text("Donation Date: " + new Date().toDateString());
     pdf.moveDown();
     pdf.end();
     const message = [{ filename: "form.pdf", path: `form_${name}.pdf` }];
