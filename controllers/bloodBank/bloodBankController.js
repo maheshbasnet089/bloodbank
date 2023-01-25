@@ -52,6 +52,7 @@ exports.renderHospitalDashboard = async (req, res, next) => {
       replacements: [id],
     }
   );
+  
   const bookAppointment = await sequelize.query(
     `SELECT * FROM bookAppointment WHERE bloodBank = ?`,
     {

@@ -46,7 +46,7 @@ exports.createBloodRequest = async (req, res, next) => {
     });
 
   await sequelize.query(
-    "CREATE TABLE  IF NOT EXISTS bloodRequest(id INT NOT NUll AUTO_INCREMENT PRIMARY KEY,userId INT,patientName VARCHAR(255),contactPerson VARCHAR(255),bloodGroup VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255),hospital VARCHAR(255),requiredPint INT,phone INT,requiredDate DATE,requiredTime VARCHAR(255),caseDetail VARCHAR(255),createdAt DATETIME DEFAULT CURRENT_TIMESTAMP) ",
+    "CREATE TABLE  IF NOT EXISTS bloodRequest(id INT NOT NUll AUTO_INCREMENT PRIMARY KEY,userId INT,patientName VARCHAR(255),contactPerson VARCHAR(255),bloodGroup VARCHAR(255),province VARCHAR(255),district VARCHAR(255),localLevel VARCHAR(255),hospital VARCHAR(255),requiredPint INT,phone VARCHAR(255),requiredDate DATE,requiredTime VARCHAR(255),caseDetail VARCHAR(255),createdAt DATETIME DEFAULT CURRENT_TIMESTAMP) ",
     {
       type: QueryTypes.CREATE,
     }
